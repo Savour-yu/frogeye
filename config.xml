@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<llrp:SET_READER_CONFIG xmlns:llrp="http://www.llrp.org/ltk/schema/core/encoding/xml/1.0" xmlns:Impinj="http://developer.impinj.com/ltk/schema/encoding/xml/1.14" Version="1" MessageID="0">
+ <llrp:ResetToFactoryDefault>0</llrp:ResetToFactoryDefault>
+ <llrp:AntennaConfiguration>
+  <llrp:AntennaID>0</llrp:AntennaID>
+  <llrp:RFReceiver>
+   <llrp:ReceiverSensitivity>2</llrp:ReceiverSensitivity>
+  </llrp:RFReceiver>
+  <llrp:RFTransmitter>
+   <llrp:HopTableID>1</llrp:HopTableID>
+   <llrp:ChannelIndex>1</llrp:ChannelIndex>
+   <llrp:TransmitPower>80</llrp:TransmitPower>
+  </llrp:RFTransmitter>
+  <llrp:C1G2InventoryCommand>
+   <llrp:TagInventoryStateAware>1</llrp:TagInventoryStateAware>
+   <llrp:C1G2RFControl>
+    <llrp:ModeIndex>1000</llrp:ModeIndex>
+    <llrp:Tari>0</llrp:Tari>
+   </llrp:C1G2RFControl>
+   <llrp:C1G2SingulationControl>
+    <llrp:Session>2</llrp:Session>
+    <llrp:TagPopulation>32</llrp:TagPopulation>
+    <llrp:TagTransitTime>0</llrp:TagTransitTime>
+   </llrp:C1G2SingulationControl>
+   <Impinj:ImpinjInventorySearchMode>
+    <Impinj:InventorySearchMode>Dual_Target</Impinj:InventorySearchMode>
+   </Impinj:ImpinjInventorySearchMode>
+   <Impinj:ImpinjLowDutyCycle>
+    <Impinj:LowDutyCycleMode>Disabled</Impinj:LowDutyCycleMode>
+    <Impinj:EmptyFieldTimeout>10000</Impinj:EmptyFieldTimeout>
+    <Impinj:FieldPingInterval>200</Impinj:FieldPingInterval>
+   </Impinj:ImpinjLowDutyCycle>
+  </llrp:C1G2InventoryCommand>
+ </llrp:AntennaConfiguration>
+ <llrp:ROReportSpec>
+  <llrp:ROReportTrigger>Upon_N_Tags_Or_End_Of_ROSpec</llrp:ROReportTrigger>
+  <llrp:N>1</llrp:N>
+  <llrp:TagReportContentSelector>
+   <llrp:EnableROSpecID>1</llrp:EnableROSpecID>
+   <llrp:EnableSpecIndex>1</llrp:EnableSpecIndex>
+   <llrp:EnableInventoryParameterSpecID>1</llrp:EnableInventoryParameterSpecID>
+   <llrp:EnableAntennaID>1</llrp:EnableAntennaID>
+   <llrp:EnableChannelIndex>1</llrp:EnableChannelIndex>
+   <llrp:EnablePeakRSSI>1</llrp:EnablePeakRSSI>
+   <llrp:EnableFirstSeenTimestamp>1</llrp:EnableFirstSeenTimestamp>
+   <llrp:EnableLastSeenTimestamp>1</llrp:EnableLastSeenTimestamp>
+   <llrp:EnableTagSeenCount>1</llrp:EnableTagSeenCount>
+   <llrp:EnableAccessSpecID>1</llrp:EnableAccessSpecID>
+   <llrp:C1G2EPCMemorySelector>
+    <llrp:EnableCRC>1</llrp:EnableCRC>
+    <llrp:EnablePCBits>1</llrp:EnablePCBits>
+   </llrp:C1G2EPCMemorySelector>
+  </llrp:TagReportContentSelector>
+ </llrp:ROReportSpec>
+</llrp:SET_READER_CONFIG>
+

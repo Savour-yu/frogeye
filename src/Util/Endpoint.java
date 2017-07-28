@@ -13,7 +13,7 @@ import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.TimeoutException;
 
-import javax.swing.JTextPane;
+
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Layout;
@@ -124,7 +124,7 @@ public class Endpoint implements LLRPEndpoint
 	private LLRPConnection connection;
 	private static String epcString = "EPC: ";
 	private static Logger logger = Logger.getLogger(Endpoint.class.getName());
-	private static Logger logger2 = Logger.getLogger("aTagRespond");
+//	private static Logger logger2 = Logger.getLogger("aTagRespond");
 	private static Logger logger3 = Logger.getLogger("epcString");
 	public static String WriteResult;
 	public static String ReadResult;
@@ -141,7 +141,7 @@ public class Endpoint implements LLRPEndpoint
 	public Vector<String[]> dVector = new Vector<String[]>();
 
 	public static String Readernum = null;
-//	TableModel tb;
+	// TableModel tb;
 	int number = 0;
 
 	private UnsignedInteger modelName;
@@ -351,6 +351,13 @@ public class Endpoint implements LLRPEndpoint
 		}
 	}
 
+	/**
+	 * decode and log the response Msg from Reader after we configured the Reader
+	 * 
+	 * @param nothing
+	 * @return nothing
+	 * 
+	 */
 	public void getReaderConfiguration()
 	{
 		LLRPMessage response;
@@ -384,7 +391,7 @@ public class Endpoint implements LLRPEndpoint
 					hopTableID = a_cfg.getRFTransmitter().getHopTableID();
 					RFTransmitter rfTransmitter = a_cfg.getRFTransmitter();
 					// rfTransmitter.getTransmitPower().toString();
-					// ��ȡ��ǰ��д����searchģʽ
+
 					List<AirProtocolInventoryCommandSettings> iclist = a_cfg
 							.getAirProtocolInventoryCommandSettingsList();
 					C1G2InventoryCommand i_com = (C1G2InventoryCommand) iclist.get(0);
@@ -423,10 +430,11 @@ public class Endpoint implements LLRPEndpoint
 							+ a_pro2.getAntennaConnected().toString() + " AntennaGain: "
 							+ a_pro2.getAntennaGain().toString());
 
-//					Window.textPane1.setText("AntennaID: " + a_pro1.getAntennaID().toString() + " -- ConnectedStatus: "
-//							+ a_pro1.getAntennaConnected().toString() + "\n" + "AntennaID: "
-//							+ a_pro2.getAntennaID().toString() + " -- ConnectedStatus: "
-//							+ a_pro2.getAntennaConnected().toString());
+					// Window.textPane1.setText("AntennaID: " + a_pro1.getAntennaID().toString() + "
+					// -- ConnectedStatus: "
+					// + a_pro1.getAntennaConnected().toString() + "\n" + "AntennaID: "
+					// + a_pro2.getAntennaID().toString() + " -- ConnectedStatus: "
+					// + a_pro2.getAntennaConnected().toString());
 				} else
 				{
 					logger.error("Could not find antenna configuration");
@@ -536,8 +544,10 @@ public class Endpoint implements LLRPEndpoint
 	}
 
 	/**
-	 * set the reader by the config document 
-	 * @param config :build by a xml document
+	 * set the reader by the config document
+	 * 
+	 * @param config
+	 *            :build by a xml document
 	 * @return nothing
 	 */
 	public void setReaderConfiguration(SET_READER_CONFIG config)
@@ -552,6 +562,7 @@ public class Endpoint implements LLRPEndpoint
 			System.exit(1);
 		}
 	}
+
 	/**
 	 * set the reader by default config file
 	 */
@@ -575,8 +586,6 @@ public class Endpoint implements LLRPEndpoint
 			}
 
 			response = connection.transact(setConfig, 10000);
-
-		
 
 			// check whetherSET_READER_CONFIG addition was successful
 			StatusCode status = ((SET_READER_CONFIG_RESPONSE) response).getLLRPStatus().getStatusCode();
@@ -798,37 +807,22 @@ public class Endpoint implements LLRPEndpoint
 
 	}
 
+	/**
+	 * we use that method
+	 * 
+	 * @param tr
+	 */
 	public void logOneTagReport(TagReportData tr)
 	{
 		// As an example here, we'll just get the stuff out of here and
 		// for a super long string
 		epcString = "";
 
-		List<AccessCommandOpSpecResult> acosr = tr.getAccessCommandOpSpecResultList();
-		for (AccessCommandOpSpecResult ac : acosr)
-		{
-			// System.out.println("qewtiousdfekldnfkdnksdjfksdjfksjfksljflsdfsdfsfsfsfdsfsdfssssssdffsddddddddddddf");
-			if (ac.getClass() == C1G2ReadOpSpecResult.class)
-			{
-				C1G2ReadOpSpecResult c = (C1G2ReadOpSpecResult) ac;
-				Dataread = c.getReadData().toString();
-				ReadResult = c.getResult().toString();
 
-				logger.info("Data" + Dataread);
-				logger.info("OpSpecID:" + c.getOpSpecID().toString());
-			} else if (ac.getClass() == C1G2WriteOpSpecResult.class)
-			{
-				C1G2WriteOpSpecResult w = (C1G2WriteOpSpecResult) ac;
-				C1G2WriteResultType writeResult = w.getResult();
-				WriteResult = writeResult.toString();
-				logger.info("Write  " + w.getNumWordsWritten().toString());
-				logger.info(writeResult);
-			}
-		}
 		// epc is not optional, so we should fail if we can't find it
 		// String epcString = "EPC: ";
-		String[] dStrings = new String[11];
-		dStrings[0] = String.valueOf(count);
+//		String[] dStrings = new String[11];
+//		dStrings[0] = String.valueOf(count);
 		LLRPParameter epcp = (LLRPParameter) tr.getEPCParameter();
 		if (epcp != null)
 		{
@@ -836,8 +830,8 @@ public class Endpoint implements LLRPEndpoint
 			{
 				EPC_96 epc96 = (EPC_96) epcp;
 				epcString += epc96.getEPC().toString();
-				dStrings[1] = epc96.getEPC().toString();
-				dStrings[3] = Readernum;
+//				dStrings[1] = epc96.getEPC().toString();
+//				dStrings[3] = Readernum;
 			} else if (epcp.getName().equals("EPCData"))
 			{
 				EPCData epcData = (EPCData) epcp;
@@ -846,14 +840,15 @@ public class Endpoint implements LLRPEndpoint
 		} else
 		{
 			logger.error("Could not find EPC in Tag Report");
-			System.exit(1);
+			return;
+//			System.exit(1);
 		}
 
 		// all of these values are optional, so check their non-nullness first
 		if (tr.getTagSeenCount() != null)
 		{
 			epcString += "\n" + " SeenCount: " + tr.getTagSeenCount().getTagCount().toString();
-			dStrings[2] = tr.getTagSeenCount().getTagCount().toString();
+//			dStrings[2] = tr.getTagSeenCount().getTagCount().toString();
 		}
 
 		if (tr.getChannelIndex() != null)
@@ -863,12 +858,12 @@ public class Endpoint implements LLRPEndpoint
 		if (tr.getPeakRSSI() != null)
 		{
 			epcString += "\n" + " RSSI: " + tr.getPeakRSSI().getPeakRSSI().toString();
-			dStrings[5] = tr.getPeakRSSI().getPeakRSSI().toString();
+//			dStrings[5] = tr.getPeakRSSI().getPeakRSSI().toString();
 		}
 		if (tr.getFirstSeenTimestampUTC() != null)
 		{
 			epcString += "\n" + " FirstSeen: " + tr.getFirstSeenTimestampUTC().getMicroseconds().toString();
-			dStrings[6] = tr.getFirstSeenTimestampUTC().getMicroseconds().toString().substring(11, 26);
+//			dStrings[6] = tr.getFirstSeenTimestampUTC().getMicroseconds().toString().substring(11, 26);
 		}
 
 		if (tr.getInventoryParameterSpecID() != null)
@@ -880,15 +875,15 @@ public class Endpoint implements LLRPEndpoint
 		if (tr.getLastSeenTimestampUTC() != null)
 		{
 			epcString += "\n" + " LastTime: " + tr.getLastSeenTimestampUTC().getMicroseconds().toString();
-			dStrings[7] = tr.getLastSeenTimestampUTC().getMicroseconds().toString().substring(11, 26);
-			dStrings[8] = cal(dStrings[6], dStrings[7]);
-			dStrings[4] = rate(dStrings[2], dStrings[8]);
+//			dStrings[7] = tr.getLastSeenTimestampUTC().getMicroseconds().toString().substring(11, 26);
+//			dStrings[8] = cal(dStrings[6], dStrings[7]);
+//			dStrings[4] = rate(dStrings[2], dStrings[8]);
 		}
 
 		if (tr.getAntennaID() != null)
 		{
 			epcString += "\n" + " Antenna: " + tr.getAntennaID().getAntennaID().toString();
-			dStrings[10] = tr.getAntennaID().getAntennaID().toString();
+//			dStrings[10] = tr.getAntennaID().getAntennaID().toString();
 		}
 
 		if (tr.getROSpecID() != null)
@@ -897,51 +892,9 @@ public class Endpoint implements LLRPEndpoint
 		}
 
 		count++;
-		// System.out.println("##########################################"+count+"\n");
 		logger3.fatal(epcString);
-		/// System.out.println(epcString);
-		if (dVector.size() != 0)
-		{
-			int flag = 0;
-			boolean f = false;
-			for (String[] s : dVector)
-			{
-
-				if (s[1].equals(dStrings[1]))
-				{
-					f = true;
-
-					int count = Integer.parseInt(dVector.get(flag)[2]);
-					// System.out.println(count);
-					// System.out.println(String.valueOf(count++));
-					count++;
-					dVector.get(flag)[2] = String.valueOf(count);
-					dVector.get(flag)[5] = dStrings[5];
-					dVector.get(flag)[7] = dStrings[7];
-					dVector.get(flag)[8] = cal(dVector.get(flag)[6], dStrings[7]).substring(0, 16);
-					dVector.get(flag)[4] = rate(dVector.get(flag)[2], dVector.get(flag)[8]);
-					/// System.out.println("lalalalalalala========="+dVector.get(flag)[2]+"\n");
-					// if(!s[10].equals(dStrings[10])){
-					// dVector.get(flag)[10]="1&2";
-					// }
-//					tb.setData(dVector);
-//					tb.fireTableDataChanged();
-
-				}
-				flag++;
-			}
-			if (f == false)
-			{
-				int number = dVector.size();
-				dStrings[0] = String.valueOf(number);
-				dVector.add(dStrings);
-			}
-		} else
-		{
-			int number = dVector.size();
-			dStrings[0] = String.valueOf(number);
-			dVector.add(dStrings);
-		}
+		
+		
 		// logger.debug(output);
 	}
 
@@ -957,28 +910,24 @@ public class Endpoint implements LLRPEndpoint
 		if (message.getTypeNum() == RO_ACCESS_REPORT.TYPENUM)
 		{
 			REPORTcount++;
-			// if(messagecount==1){
-			// logger.info(REPORTcount+"reportreportreportreportreportreportreportreportreportreport");
+
 			RO_ACCESS_REPORT report1 = (RO_ACCESS_REPORT) message;
 
 			List<TagReportData> tdlist1 = report1.getTagReportDataList();
 			for (TagReportData tr : tdlist1)
 			{
-
-//				tb = Window.tableModel;
+				Frame.decodeTagReport(tr);
+				
 				logOneTagReport(tr);
-				// tb.setTagData(dataVector);
-				for (int i = 0; i < dVector.size(); i++)
-				{
-					String[] aTagRspd = dVector.get(i);
-					logger2.fatal(String.format("[%s]\t%s\t%s\t%s", aTagRspd[0], aTagRspd[1],
-							aTagRspd[5] != null ? aTagRspd[5] : 90, aTagRspd[10]));
-
-				}
-//				tb.setData(dVector);
-//				tb.fireTableDataChanged();
+//				for (int i = 0; i < dVector.size(); i++)
+//				{
+//					String[] aTagRspd = dVector.get(i);
+////					logger2.fatal(String.format("[%s]\t%s\t%s\t%s", aTagRspd[0], aTagRspd[1],
+////							aTagRspd[5] != null ? aTagRspd[5] : 90, aTagRspd[10]));
+//
+//				}
+				
 				count1++;
-
 			}
 			List<Custom> clist1 = report1.getCustomList();
 			for (Custom cust : clist1)
@@ -993,8 +942,7 @@ public class Endpoint implements LLRPEndpoint
 			logger.info(NOTIFYcount + ":there are some READER_EVENT_NPTIFICATION occured!");
 			READER_EVENT_NOTIFICATION notification = (READER_EVENT_NOTIFICATION) message;
 			ReaderEventNotificationData notifdata = notification.getReaderEventNotificationData();
-			// get antenna status(only when status get changed ,a notification will contain
-			// the AntennaEvent)
+
 			AntennaEvent aEvent = notifdata.getAntennaEvent();
 		}
 
@@ -1189,15 +1137,16 @@ public class Endpoint implements LLRPEndpoint
 		// example.addAccessSpec();
 		example.enable();
 
-
 		example.start();
-		Scanner aScanner = new Scanner(System.in);
-		while(!aScanner.nextLine().equals("exit")) {}
-		aScanner.close();
-		
+		 Scanner aScanner = new Scanner(System.in);
+		 while (!aScanner.nextLine().equals("exit"))
+		 {
+		 }
+		 aScanner.close();
+
 //		try
 //		{
-//			
+//
 //			Thread.sleep(10000);
 //			// example.getReport();
 //		} catch (InterruptedException ex)
@@ -1207,7 +1156,7 @@ public class Endpoint implements LLRPEndpoint
 
 		example.stop();
 		example.disconnect();
-		logger2.fatal("The count of how many times tag were read:" + count1);
+//		logger2.fatal("The count of how many times tag were read:" + count1);
 		logger3.fatal("The count of how many times tag were read:" + count1);
 		System.exit(0);
 	}
