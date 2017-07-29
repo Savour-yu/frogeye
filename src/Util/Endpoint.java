@@ -4,10 +4,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
+
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
@@ -417,7 +416,7 @@ public class Endpoint implements LLRPEndpoint
 				if (!pList.isEmpty())
 				{
 					AntennaProperties a_pro1 = pList.get(0);
-					
+
 					logger.info("AntennaID: " + a_pro1.getAntennaID().toString() + " ConnectedStatus: "
 							+ a_pro1.getAntennaConnected().toString() + " AntennaGain: "
 							+ a_pro1.getAntennaGain().toString());
@@ -425,7 +424,6 @@ public class Endpoint implements LLRPEndpoint
 					logger.info("AntennaID: " + a_pro2.getAntennaID().toString() + " ConnectedStatus: "
 							+ a_pro2.getAntennaConnected().toString() + " AntennaGain: "
 							+ a_pro2.getAntennaGain().toString());
-
 
 				} else
 				{
@@ -544,7 +542,7 @@ public class Endpoint implements LLRPEndpoint
 	 */
 	public void setReaderConfiguration(SET_READER_CONFIG config)
 	{
-		
+
 		try
 		{
 			connection.transact(config, 10000);
@@ -751,7 +749,7 @@ public class Endpoint implements LLRPEndpoint
 	public void logOneCustom(Custom cust)
 	{
 
-		if (!cust.getVendorIdentifier().equals(25882))
+		if (cust.getVendorIdentifier().intValue() != (25882))
 		{
 			logger.error("Non Impinj Extension Found in message");
 			return;
@@ -1000,7 +998,7 @@ public class Endpoint implements LLRPEndpoint
 
 	public void enable_notification()
 	{
-		
+
 		logger.info("ENABLE_EVENT_AND_REPORTS");
 		ENABLE_EVENTS_AND_REPORTS eer = new ENABLE_EVENTS_AND_REPORTS();
 		eer.setMessageID(getUniqueMessageID());

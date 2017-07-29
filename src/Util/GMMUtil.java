@@ -195,7 +195,7 @@ public class GMMUtil {
 	
 	/**
 	 * 
-	* @Title: dotMatrixMultiply 
+	* @Title: dotMatrixDivide 
 	* @Description: 矩阵的点除，即对应元素相除
 	* @return double[][]
 	* @throws
@@ -226,7 +226,7 @@ public class GMMUtil {
 	/**
 	 * 
 	* @Title: matrixMinux 
-	* @Description: 计算集合只差
+	* @Description: 计算集合值差
 	* @return ArrayList<ArrayList<Double>>
 	* @throws
 	 */
