@@ -13,8 +13,6 @@ import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.TimeoutException;
 
-
-
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Layout;
 import org.apache.log4j.Level;
@@ -124,7 +122,7 @@ public class Endpoint implements LLRPEndpoint
 	private LLRPConnection connection;
 	private static String epcString = "EPC: ";
 	private static Logger logger = Logger.getLogger(Endpoint.class.getName());
-//	private static Logger logger2 = Logger.getLogger("aTagRespond");
+	// private static Logger logger2 = Logger.getLogger("aTagRespond");
 	private static Logger logger3 = Logger.getLogger("epcString");
 	public static String WriteResult;
 	public static String ReadResult;
@@ -419,9 +417,7 @@ public class Endpoint implements LLRPEndpoint
 				if (!pList.isEmpty())
 				{
 					AntennaProperties a_pro1 = pList.get(0);
-					// a_pro1.getAntennaID().toString();
-					// a_pro1.getAntennaConnected().toString();
-					// a_pro1.getAntennaGain().toString();
+					
 					logger.info("AntennaID: " + a_pro1.getAntennaID().toString() + " ConnectedStatus: "
 							+ a_pro1.getAntennaConnected().toString() + " AntennaGain: "
 							+ a_pro1.getAntennaGain().toString());
@@ -430,11 +426,7 @@ public class Endpoint implements LLRPEndpoint
 							+ a_pro2.getAntennaConnected().toString() + " AntennaGain: "
 							+ a_pro2.getAntennaGain().toString());
 
-					// Window.textPane1.setText("AntennaID: " + a_pro1.getAntennaID().toString() + "
-					// -- ConnectedStatus: "
-					// + a_pro1.getAntennaConnected().toString() + "\n" + "AntennaID: "
-					// + a_pro2.getAntennaID().toString() + " -- ConnectedStatus: "
-					// + a_pro2.getAntennaConnected().toString());
+
 				} else
 				{
 					logger.error("Could not find antenna configuration");
@@ -552,10 +544,10 @@ public class Endpoint implements LLRPEndpoint
 	 */
 	public void setReaderConfiguration(SET_READER_CONFIG config)
 	{
-		LLRPMessage response;
+		
 		try
 		{
-			response = connection.transact(config, 10000);
+			connection.transact(config, 10000);
 		} catch (TimeoutException e)
 		{
 			logger.error("Timeout waiting for SET_READER_CONFIG response");
@@ -766,47 +758,6 @@ public class Endpoint implements LLRPEndpoint
 		}
 	}
 
-	public String cal(String t0, String t1)
-	{
-		String[] tx0 = t0.split(":");
-		String[] tx1 = t1.split(":");
-		int hx = Integer.parseInt(tx1[0]) - Integer.parseInt(tx0[0]);
-		int mx = Integer.parseInt(tx1[1]) - Integer.parseInt(tx0[1]);
-		double sx = Double.parseDouble(tx1[2]) - Double.parseDouble(tx0[2]);
-		if (sx < 0)
-		{
-			sx = sx + 60;
-			mx = mx - 1;
-			if (mx < 0)
-			{
-				mx = mx + 60;
-				hx = hx - 1;
-				if (hx < 0)
-					hx = hx + 24;
-			}
-		}
-		String TX = String.valueOf(hx) + ":" + String.valueOf(mx) + ":" + String.valueOf(sx);
-		return TX;
-	}
-
-	public String rate(String times, String tx)
-	{
-		int t = Integer.parseInt(times);
-		String[] tx1 = tx.split(":");
-		int hx = Integer.parseInt(tx1[0]);
-		int mx = Integer.parseInt(tx1[1]);
-		double sx = Double.parseDouble(tx1[2]);
-		double seconds = hx * 60 * 60 + mx * 60 + sx;
-		double v;
-		if (seconds != 0)
-			v = t / seconds;
-		else
-			v = 0;
-		String v1 = String.valueOf(v);
-		return v1;
-
-	}
-
 	/**
 	 * we use that method
 	 * 
@@ -818,11 +769,8 @@ public class Endpoint implements LLRPEndpoint
 		// for a super long string
 		epcString = "";
 
-
 		// epc is not optional, so we should fail if we can't find it
 		// String epcString = "EPC: ";
-//		String[] dStrings = new String[11];
-//		dStrings[0] = String.valueOf(count);
 		LLRPParameter epcp = (LLRPParameter) tr.getEPCParameter();
 		if (epcp != null)
 		{
@@ -830,8 +778,6 @@ public class Endpoint implements LLRPEndpoint
 			{
 				EPC_96 epc96 = (EPC_96) epcp;
 				epcString += epc96.getEPC().toString();
-//				dStrings[1] = epc96.getEPC().toString();
-//				dStrings[3] = Readernum;
 			} else if (epcp.getName().equals("EPCData"))
 			{
 				EPCData epcData = (EPCData) epcp;
@@ -841,14 +787,14 @@ public class Endpoint implements LLRPEndpoint
 		{
 			logger.error("Could not find EPC in Tag Report");
 			return;
-//			System.exit(1);
+
 		}
 
 		// all of these values are optional, so check their non-nullness first
 		if (tr.getTagSeenCount() != null)
 		{
 			epcString += "\n" + " SeenCount: " + tr.getTagSeenCount().getTagCount().toString();
-//			dStrings[2] = tr.getTagSeenCount().getTagCount().toString();
+
 		}
 
 		if (tr.getChannelIndex() != null)
@@ -858,12 +804,10 @@ public class Endpoint implements LLRPEndpoint
 		if (tr.getPeakRSSI() != null)
 		{
 			epcString += "\n" + " RSSI: " + tr.getPeakRSSI().getPeakRSSI().toString();
-//			dStrings[5] = tr.getPeakRSSI().getPeakRSSI().toString();
 		}
 		if (tr.getFirstSeenTimestampUTC() != null)
 		{
 			epcString += "\n" + " FirstSeen: " + tr.getFirstSeenTimestampUTC().getMicroseconds().toString();
-//			dStrings[6] = tr.getFirstSeenTimestampUTC().getMicroseconds().toString().substring(11, 26);
 		}
 
 		if (tr.getInventoryParameterSpecID() != null)
@@ -875,15 +819,11 @@ public class Endpoint implements LLRPEndpoint
 		if (tr.getLastSeenTimestampUTC() != null)
 		{
 			epcString += "\n" + " LastTime: " + tr.getLastSeenTimestampUTC().getMicroseconds().toString();
-//			dStrings[7] = tr.getLastSeenTimestampUTC().getMicroseconds().toString().substring(11, 26);
-//			dStrings[8] = cal(dStrings[6], dStrings[7]);
-//			dStrings[4] = rate(dStrings[2], dStrings[8]);
 		}
 
 		if (tr.getAntennaID() != null)
 		{
 			epcString += "\n" + " Antenna: " + tr.getAntennaID().getAntennaID().toString();
-//			dStrings[10] = tr.getAntennaID().getAntennaID().toString();
 		}
 
 		if (tr.getROSpecID() != null)
@@ -893,9 +833,7 @@ public class Endpoint implements LLRPEndpoint
 
 		count++;
 		logger3.fatal(epcString);
-		
-		
-		// logger.debug(output);
+
 	}
 
 	@Override
@@ -917,16 +855,16 @@ public class Endpoint implements LLRPEndpoint
 			for (TagReportData tr : tdlist1)
 			{
 				Frame.decodeTagReport(tr);
-				
+
 				logOneTagReport(tr);
-//				for (int i = 0; i < dVector.size(); i++)
-//				{
-//					String[] aTagRspd = dVector.get(i);
-////					logger2.fatal(String.format("[%s]\t%s\t%s\t%s", aTagRspd[0], aTagRspd[1],
-////							aTagRspd[5] != null ? aTagRspd[5] : 90, aTagRspd[10]));
-//
-//				}
-				
+				// for (int i = 0; i < dVector.size(); i++)
+				// {
+				// String[] aTagRspd = dVector.get(i);
+				//// logger2.fatal(String.format("[%s]\t%s\t%s\t%s", aTagRspd[0], aTagRspd[1],
+				//// aTagRspd[5] != null ? aTagRspd[5] : 90, aTagRspd[10]));
+				//
+				// }
+
 				count1++;
 			}
 			List<Custom> clist1 = report1.getCustomList();
@@ -943,129 +881,133 @@ public class Endpoint implements LLRPEndpoint
 			READER_EVENT_NOTIFICATION notification = (READER_EVENT_NOTIFICATION) message;
 			ReaderEventNotificationData notifdata = notification.getReaderEventNotificationData();
 
-			AntennaEvent aEvent = notifdata.getAntennaEvent();
+			notifdata.getAntennaEvent();
 		}
 
 	}
 
-	public void addAccessSpec()
-	{
-		LLRPMessage response;
+	// public void addAccessSpec()
+	// {
+	// LLRPMessage response;
+	//
+	// logger.info("Loading ADD_ACCESSSPEC message from file ADD_ACCESSSPEC.xml
+	// ...");
+	// try
+	// {
+	// LLRPMessage addAccessMsg = Util.loadXMLLLRPMessage(new
+	// File("D:\\ADD_ACCESSSPEC.xml"));
+	// // TODO make sure this is an SET_READER_CONFIG message
+	// ADD_ACCESSSPEC addAccessSpec = (ADD_ACCESSSPEC) addAccessMsg;
+	// AccessSpec aSpec = addAccessSpec.getAccessSpec();
+	//
+	// AccessCommand aCommand = aSpec.getAccessCommand();
+	// C1G2TagSpec c1g2TagSpec = (C1G2TagSpec) aCommand.getAirProtocolTagSpec();
+	// C1G2TargetTag c1g2TargetTag = c1g2TagSpec.getC1G2TargetTagList().get(0);
+	// c1g2TargetTag.setMatch(new Bit(true));
+	// c1g2TargetTag.setMB(new TwoBitField("1"));
+	// c1g2TargetTag.setPointer(new UnsignedShort(32));
+	// c1g2TargetTag.setTagMask(new BitArray_HEX("ffffffffffffffffffffffff"));
+	// c1g2TargetTag.setTagData(new BitArray_HEX("222222222222222222222222"));
+	// C1G2Write write = new C1G2Write();
+	// write.setAccessPassword(new UnsignedInteger(0));
+	// write.setMB(new TwoBitField("2"));
+	// write.setWordPointer(new UnsignedShort("0"));
+	// write.setOpSpecID(new UnsignedShort("2"));
+	// write.setWriteData(new UnsignedShortArray_HEX("1111"));
+	// aCommand.addToAccessCommandOpSpecList(write);
+	// // commandlist.add();
+	// // TODO WRITE I have no idea
+	// response = connection.transact(addAccessMsg, 10000);
+	//
+	// // check whetherSET_READER_CONFIG addition was successful
+	// StatusCode status = ((ADD_ACCESSSPEC_RESPONSE)
+	// response).getLLRPStatus().getStatusCode();
+	// if (status.equals(new StatusCode("M_Success")))
+	// {
+	// logger.info("ADD_ACCESSSPEC was successful");
+	//
+	// // save a copy for later
+	// accessspec = ((ADD_ACCESSSPEC) addAccessMsg).getAccessSpec();
+	// } else
+	// {
+	// logger.info(response.toXMLString());
+	// logger.info("ADD_ACCESSSPEC failures");
+	// System.exit(1);
+	// }
+	//
+	// } catch (TimeoutException ex)
+	// {
+	// logger.error("Timeout waiting for ADD_ACCESSSPEC response");
+	// System.exit(1);
+	// } catch (FileNotFoundException ex)
+	// {
+	// logger.error("Could not find file");
+	// System.exit(1);
+	// } catch (IOException ex)
+	// {
+	// logger.error("IO Exception on file");
+	// System.exit(1);
+	// } catch (JDOMException ex)
+	// {
+	// logger.error("Unable to convert LTK-XML to DOM");
+	// System.exit(1);
+	// } catch (InvalidLLRPMessageException ex)
+	// {
+	// logger.error("Unable to convert LTK-XML to Internal Object");
+	// System.exit(1);
+	// }
+	// }
 
-		logger.info("Loading ADD_ACCESSSPEC message from file ADD_ACCESSSPEC.xml ...");
-		try
-		{
-			LLRPMessage addAccessMsg = Util.loadXMLLLRPMessage(new File("D:\\ADD_ACCESSSPEC.xml"));
-			// TODO make sure this is an SET_READER_CONFIG message
-			ADD_ACCESSSPEC addAccessSpec = (ADD_ACCESSSPEC) addAccessMsg;
-			AccessSpec aSpec = addAccessSpec.getAccessSpec();
+	// public void enableAccess()
+	// {
+	// LLRPMessage response;
+	// try
+	// {
+	// // factory default the reader
+	// logger.info("ENABLE_ACCESSSPEC ...");
+	// ENABLE_ACCESSSPEC ena = new ENABLE_ACCESSSPEC();
+	// ena.setMessageID(getUniqueMessageID());
+	// ena.setAccessSpecID(accessspec.getAccessSpecID());
+	//
+	// response = connection.transact(ena, 10000);
+	//
+	// // check whether ROSpec addition was successful
+	// StatusCode status = ((ENABLE_ACCESSSPEC_RESPONSE)
+	// response).getLLRPStatus().getStatusCode();
+	// if (status.equals(new StatusCode("M_Success")))
+	// {
+	// logger.info("ENABLE_ACCESSSPEC was successful");
+	// } else
+	// {
+	// logger.error(response.toXMLString());
+	// logger.info("ENABLE_ACCESSSPEC failed ");
+	// System.exit(1);
+	// }
+	// } catch (Exception e)
+	// {
+	// e.printStackTrace();
+	// System.exit(1);
+	// }
+	// }
 
-			AccessCommand aCommand = aSpec.getAccessCommand();
-			C1G2TagSpec c1g2TagSpec = (C1G2TagSpec) aCommand.getAirProtocolTagSpec();
-			C1G2TargetTag c1g2TargetTag = c1g2TagSpec.getC1G2TargetTagList().get(0);
-			c1g2TargetTag.setMatch(new Bit(true));
-			c1g2TargetTag.setMB(new TwoBitField("1"));
-			c1g2TargetTag.setPointer(new UnsignedShort(32));
-			c1g2TargetTag.setTagMask(new BitArray_HEX("ffffffffffffffffffffffff"));
-			c1g2TargetTag.setTagData(new BitArray_HEX("222222222222222222222222"));
-			C1G2Write write = new C1G2Write();
-			write.setAccessPassword(new UnsignedInteger(0));
-			write.setMB(new TwoBitField("2"));
-			write.setWordPointer(new UnsignedShort("0"));
-			write.setOpSpecID(new UnsignedShort("2"));
-			write.setWriteData(new UnsignedShortArray_HEX("1111"));
-			aCommand.addToAccessCommandOpSpecList(write);
-			// commandlist.add();
-			// TODO WRITE I have no idea
-			response = connection.transact(addAccessMsg, 10000);
-
-			// check whetherSET_READER_CONFIG addition was successful
-			StatusCode status = ((ADD_ACCESSSPEC_RESPONSE) response).getLLRPStatus().getStatusCode();
-			if (status.equals(new StatusCode("M_Success")))
-			{
-				logger.info("ADD_ACCESSSPEC was successful");
-
-				// save a copy for later
-				accessspec = ((ADD_ACCESSSPEC) addAccessMsg).getAccessSpec();
-			} else
-			{
-				logger.info(response.toXMLString());
-				logger.info("ADD_ACCESSSPEC failures");
-				System.exit(1);
-			}
-
-		} catch (TimeoutException ex)
-		{
-			logger.error("Timeout waiting for ADD_ACCESSSPEC response");
-			System.exit(1);
-		} catch (FileNotFoundException ex)
-		{
-			logger.error("Could not find file");
-			System.exit(1);
-		} catch (IOException ex)
-		{
-			logger.error("IO Exception on file");
-			System.exit(1);
-		} catch (JDOMException ex)
-		{
-			logger.error("Unable to convert LTK-XML to DOM");
-			System.exit(1);
-		} catch (InvalidLLRPMessageException ex)
-		{
-			logger.error("Unable to convert LTK-XML to Internal Object");
-			System.exit(1);
-		}
-	}
-
-	public void enableAccess()
-	{
-		LLRPMessage response;
-		try
-		{
-			// factory default the reader
-			logger.info("ENABLE_ACCESSSPEC ...");
-			ENABLE_ACCESSSPEC ena = new ENABLE_ACCESSSPEC();
-			ena.setMessageID(getUniqueMessageID());
-			ena.setAccessSpecID(accessspec.getAccessSpecID());
-
-			response = connection.transact(ena, 10000);
-
-			// check whether ROSpec addition was successful
-			StatusCode status = ((ENABLE_ACCESSSPEC_RESPONSE) response).getLLRPStatus().getStatusCode();
-			if (status.equals(new StatusCode("M_Success")))
-			{
-				logger.info("ENABLE_ACCESSSPEC was successful");
-			} else
-			{
-				logger.error(response.toXMLString());
-				logger.info("ENABLE_ACCESSSPEC failed ");
-				System.exit(1);
-			}
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
-
-	public void getReport()
-	{
-		GET_REPORT grep = new GET_REPORT();
-		grep.setMessageID(getUniqueMessageID());
-		logger.info("Sending GET_REPORT ...");
-		connection.send(grep);
-	}
+	// public void getReport()
+	// {
+	// GET_REPORT grep = new GET_REPORT();
+	// grep.setMessageID(getUniqueMessageID());
+	// logger.info("Sending GET_REPORT ...");
+	// connection.send(grep);
+	// }
 
 	public void enable_notification()
 	{
-		LLRPMessage response;
+		
 		logger.info("ENABLE_EVENT_AND_REPORTS");
 		ENABLE_EVENTS_AND_REPORTS eer = new ENABLE_EVENTS_AND_REPORTS();
 		eer.setMessageID(getUniqueMessageID());
 
 		try
 		{
-			response = connection.transact(eer, 10000);
+			connection.transact(eer, 10000);
 		} catch (TimeoutException e)
 		{
 			// TODO Auto-generated catch block
@@ -1074,45 +1016,47 @@ public class Endpoint implements LLRPEndpoint
 	}
 
 	// to get former AccessSpec
-	public void getAccessSpec()
-	{
-		LLRPMessage response;
-		GET_ACCESSSPECS_RESPONSE gasr;
-		GET_ACCESSSPECS get = new GET_ACCESSSPECS();
-		AccessSpec accessSpec = new AccessSpec();
-		get.setMessageID(getUniqueMessageID());
-		logger.info("sending GET_ACCESSSPEC message...");
-		try
-		{
-			response = connection.transact(get);
-			gasr = (GET_ACCESSSPECS_RESPONSE) response;
-			StatusCode status = gasr.getLLRPStatus().getStatusCode();
-			if (status.equals(new StatusCode("M_Success")))
-			{
-				logger.info("GET_ACCESSSPEC was successful");
-				List<AccessSpec> aList = gasr.getAccessSpecList();
-				if (!aList.isEmpty())
-				{
-					logger.info("accesspeclist size==" + aList.size());
-					AccessCommand accessCommand = aList.get(0).getAccessCommand();
-					List<AccessCommandOpSpec> aclist = accessCommand.getAccessCommandOpSpecList();
-					AccessCommandOpSpec accessCommandOpSpec = aclist.get(0);
-					logger.info("GETCLASS=" + accessCommandOpSpec.getClass().toString());
-				}
-			}
-		} catch (TimeoutException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
+	// public void getAccessSpec()
+	// {
+	// LLRPMessage response;
+	// GET_ACCESSSPECS_RESPONSE gasr;
+	// GET_ACCESSSPECS get = new GET_ACCESSSPECS();
+	// AccessSpec accessSpec = new AccessSpec();
+	// get.setMessageID(getUniqueMessageID());
+	// logger.info("sending GET_ACCESSSPEC message...");
+	// try
+	// {
+	// response = connection.transact(get);
+	// gasr = (GET_ACCESSSPECS_RESPONSE) response;
+	// StatusCode status = gasr.getLLRPStatus().getStatusCode();
+	// if (status.equals(new StatusCode("M_Success")))
+	// {
+	// logger.info("GET_ACCESSSPEC was successful");
+	// List<AccessSpec> aList = gasr.getAccessSpecList();
+	// if (!aList.isEmpty())
+	// {
+	// logger.info("accesspeclist size==" + aList.size());
+	// AccessCommand accessCommand = aList.get(0).getAccessCommand();
+	// List<AccessCommandOpSpec> aclist =
+	// accessCommand.getAccessCommandOpSpecList();
+	// AccessCommandOpSpec accessCommandOpSpec = aclist.get(0);
+	// logger.info("GETCLASS=" + accessCommandOpSpec.getClass().toString());
+	// }
+	// }
+	// } catch (TimeoutException e)
+	// {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	//
+	// }
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args)
 	{
+		Frame.setEPCListFromFile("D:\\EPCList.txt");
 		BasicConfigurator.configure();
 
 		if (args.length < 1)
@@ -1138,25 +1082,25 @@ public class Endpoint implements LLRPEndpoint
 		example.enable();
 
 		example.start();
-		 Scanner aScanner = new Scanner(System.in);
-		 while (!aScanner.nextLine().equals("exit"))
-		 {
-		 }
-		 aScanner.close();
+		Scanner aScanner = new Scanner(System.in);
+		while (!aScanner.nextLine().equals("exit"))
+		{
+		}
+		aScanner.close();
 
-//		try
-//		{
-//
-//			Thread.sleep(10000);
-//			// example.getReport();
-//		} catch (InterruptedException ex)
-//		{
-//			logger.error("Sleep Interrupted");
-//		}
+		// try
+		// {
+		//
+		// Thread.sleep(10000);
+		// // example.getReport();
+		// } catch (InterruptedException ex)
+		// {
+		// logger.error("Sleep Interrupted");
+		// }
 
 		example.stop();
 		example.disconnect();
-//		logger2.fatal("The count of how many times tag were read:" + count1);
+		// logger2.fatal("The count of how many times tag were read:" + count1);
 		logger3.fatal("The count of how many times tag were read:" + count1);
 		System.exit(0);
 	}

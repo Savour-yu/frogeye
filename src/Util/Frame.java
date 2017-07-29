@@ -1,5 +1,9 @@
 package Util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -12,16 +16,18 @@ public class Frame
 {
 	private static int tagNum;// the number of tag in a frame
 	private static int antNum = 1;// the number of antenna, also means the dimension of a read
-	private static int readLength=10;// we define readLength as the times of reading in a frame
+	private static int readLength = 10;// we define readLength as the times of reading in a frame
 	private static ArrayList<String> tagEpcList = new ArrayList<String>();// we use that to store all tag EPC we monitor
 	private static int countFrame = 0;// to count the num of all frame from we run the program
 	private static Logger logger = Logger.getLogger("FrameLog");// log every Frame and some error
-	private static int[][][] unit = new int[tagNum][(int)(readLength*1.3)][antNum];
-	private static int[][] countRead = new int[tagNum][antNum];// to count the num of read for every tag,a read contains antNum
-														// RSSI
-//	private static int[] countAnt = new int[antNum];
+	private static int[][][] unit = new int[tagNum][(int) (readLength * 1.3)][antNum];
+	private static int[][] countRead = new int[tagNum][antNum];// to count the num of read for every tag,a read contains
+																// antNum
+	// RSSI
+	// private static int[] countAnt = new int[antNum];
 	private static int countTagReport = 0;
-	private static int[] countFull = new int[antNum]; //count the full RSSI in unit
+	private static int[] countFull = new int[antNum]; // count the full RSSI in unit
+
 	public Frame()
 	{
 
@@ -65,36 +71,73 @@ public class Frame
 			logger.error("Could not get EPC, RSSI or AntennaID,lost a tag report");
 			return;
 		}
-		
+
 		if (tagEpcList.contains(aEPC))
 		{
-			logger.error(String.format("[%-5d]\t[%-3d]\t%s\t%d\t%d",countTagReport,tagEpcList.indexOf(aEPC), aEPC,RSSI,AntennaID));
-//			logger.error(String.format("[%-3d]\t%d",tagEpcList.indexOf(aEPC), AntennaID));
-			
-			int index = tagEpcList.indexOf(aEPC);
-			unit[index][countRead[index][AntennaID - 1]][AntennaID - 1] = RSSI;
-			if (countRead[index][AntennaID - 1] < ((int)readLength*1.3))
-			{
-				countRead[index][AntennaID - 1]++;
-			}else {
-				countFull[AntennaID - 1]++;
-			}
-			for(int i =0;i<antNum;i++) {
-				if(countFull[i]>=tagNum*0.8) {
-//					take the first readLength unit to Guassian
-				}
-			}
-		} else if(RSSI>-40)
+			logger.error(String.format("[%-5d]\t[%-3d]\t%s\t%d\t%d", countTagReport, tagEpcList.indexOf(aEPC), aEPC,
+					RSSI, AntennaID));
+			// logger.error(String.format("%s", aEPC));
+
+			// int index = tagEpcList.indexOf(aEPC);
+			// unit[index][countRead[index][AntennaID - 1]][AntennaID - 1] = RSSI;
+			// if (countRead[index][AntennaID - 1] < ((int) readLength * 1.3))
+			// {
+			// countRead[index][AntennaID - 1]++;
+			// } else
+			// {
+			// countFull[AntennaID - 1]++;
+			// }
+			// for (int i = 0; i < antNum; i++)
+			// {
+			// if (countFull[i] >= tagNum * 0.8)
+			// {
+			// // take the first readLength unit to Guassian
+			// }
+			// }
+		} else if (RSSI > -43)
 		{
 			tagEpcList.add(aEPC);
-			
+
 		}
 		countTagReport++;
-		
-	}
-	
 
-}
-class Uint{
-	private static int tagNum = Frame.;
+	}
+
+	public static void setEPCListFromFile(String filePath)
+	{
+		try
+		{
+			String encoding = "utf-8";
+			File file = new File(filePath);
+			if (file.isFile() && file.exists())
+			{ // 判断文件是否存在
+				InputStreamReader read = new InputStreamReader(new FileInputStream(file), encoding);// 考虑到编码格式
+				BufferedReader bufferedReader = new BufferedReader(read);
+				String lineTxt = null;
+				while ((lineTxt = bufferedReader.readLine()) != null)
+				{
+					tagEpcList.add(lineTxt);
+				}
+				read.close();
+			} else
+			{
+				System.out.println("找不到指定的文件");
+			}
+		} catch (Exception e)
+		{
+			System.out.println("读取文件内容出错");
+			e.printStackTrace();
+		}
+	}
+
+	public static void main(String[] args)
+	{
+		Frame.setEPCListFromFile("D:\\EPCList.txt");
+		for (String item : tagEpcList)
+		{
+			System.out.println(item);
+		}
+
+	}
+
 }
