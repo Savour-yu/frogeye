@@ -452,7 +452,7 @@ public class GMMUtil
 		int x, y, k, k1, rows = image.size(), cols = image.get(0).size();
 		double alpha = (double) learningRate, T = (double) backgroundRatio, vT = (double) varThreshold;// 学习速率、背景门限、方差门限
 		int K = nmixtures;// 混合模型个数
-		ArrayList<MixData> mptr = bgmodel.data;
+		ArrayList<MixData> mptr = new ArrayList<MixData>();/* = bgmodel.data*/;
 
 		final double w0 = (double) defaultInitialWeight;// 初始权值
 		final double sk0 = (double) (w0 / (defaultNoiseSigma * 2));// 初始优先级

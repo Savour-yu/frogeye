@@ -2,7 +2,7 @@ package GMM;
 
 import java.util.ArrayList;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
+
 
 public class Parameter
 {
