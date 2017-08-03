@@ -1,6 +1,7 @@
 package Util;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 class MixData
 {
@@ -41,6 +42,31 @@ public class GMMUtil
 			squareSum += (d1.get(i) - d2.get(i)) * (d1.get(i) - d2.get(i));
 		}
 		return Math.sqrt(squareSum);
+	}
+
+	/**
+	 * 计算马氏距离
+	 * 
+	 * @param test带计算向量
+	 * @param mean均值向量
+	 * @param cov协方差
+	 * @return 马氏距离
+	 */
+	public static double computeMahalanobisDistance(ArrayList<Double> test, ArrayList<Double> mean,
+			ArrayList<Double> cov)
+	{
+		double MahalanobisDistance;
+		ArrayList<Double> diff = arrayMinus(test, mean);// 测试向量与均值向量的差
+		double[][] AT = toArray1(diff);// 向量转换成矩阵的第一行,此矩阵为差向量的转置。一行N列
+		double[][] A = matrixReverse(AT);// 转置矩阵的转置为差向量,N行一列
+		// 马氏距离为AT*B-1*A，其中A为数据与均值的差，AT是其转置，B为协方差矩阵，B-1是协方差矩阵的逆,1*d * d*d * d*1
+		// 首先我们将协方差向量还原为协方差矩阵
+		double[][] covMatrix = diag(toArray1(cov)[0]);
+		// 然后我们将三者乘积计算出来，乘积的结果为1*1的矩阵，其中唯一的元素就是马氏距离
+		double[][] temp = matrixMultiply(AT, covMatrix);
+		MahalanobisDistance = matrixMultiply(temp, A)[0][0];
+
+		return MahalanobisDistance;
 	}
 
 	/**
@@ -236,18 +262,27 @@ public class GMMUtil
 	 */
 	public static double[][] matrixMultiply(double[][] a, double[][] b)
 	{
-		double[][] res = new double[a.length][b[0].length];
-		for (int i = 0; i < a.length; i++)
+		if (a[0].length == b.length)
 		{
-			for (int j = 0; j < b[0].length; j++)
+
+			double[][] res = new double[a.length][b[0].length];
+			for (int i = 0; i < a.length; i++)
 			{
-				for (int k = 0; k < a[0].length; k++)
+				for (int j = 0; j < b[0].length; j++)
 				{
-					res[i][j] += a[i][k] * b[k][j];
+					for (int k = 0; k < a[0].length; k++)
+					{
+						res[i][j] += a[i][k] * b[k][j];
+					}
 				}
 			}
+			return res;
+		} else
+		{
+			System.out.print("the arraylist1 and arraylist2 is not comparable");
+			System.exit(1);
+			return null;
 		}
-		return res;
 	}
 
 	/**
@@ -259,15 +294,24 @@ public class GMMUtil
 	 */
 	public static double[][] dotMatrixMultiply(double[][] a, double[][] b)
 	{
-		double[][] res = new double[a.length][a[0].length];
-		for (int i = 0; i < a.length; i++)
+		if (a.length == b.length && a[0].length == b[0].length)
 		{
-			for (int j = 0; j < a[0].length; j++)
+			double[][] res = new double[a.length][a[0].length];
+			for (int i = 0; i < a.length; i++)
 			{
-				res[i][j] = a[i][j] * b[i][j];
+				for (int j = 0; j < a[0].length; j++)
+				{
+					res[i][j] = a[i][j] * b[i][j];
+				}
 			}
+			return res;
+		} else
+		{
+			System.out.print("the arraylist1 and arraylist2 is not comparable");
+			System.exit(1);
+			return null;
 		}
-		return res;
+
 	}
 
 	/**
@@ -281,15 +325,24 @@ public class GMMUtil
 	 */
 	public static double[][] dotMatrixDivide(double[][] a, double[][] b)
 	{
-		double[][] res = new double[a.length][a[0].length];
-		for (int i = 0; i < a.length; i++)
+		if (a.length == b.length && a[0].length == b[0].length)
 		{
-			for (int j = 0; j < a[0].length; j++)
+			double[][] res = new double[a.length][a[0].length];
+			for (int i = 0; i < a.length; i++)
 			{
-				res[i][j] = a[i][j] / b[i][j];
+				for (int j = 0; j < a[0].length; j++)
+				{
+					res[i][j] = a[i][j] / b[i][j];
+				}
 			}
+			return res;
+		} else
+		{
+			System.out.print("the arraylist1 and arraylist2 is not comparable");
+			System.exit(1);
+			return null;
 		}
-		return res;
+
 	}
 
 	// /**
@@ -306,23 +359,62 @@ public class GMMUtil
 	// }
 
 	/**
+	 * 求两个矩阵的差
 	 * 
 	 * @Title: matrixMinux
-	 * @Description: 计算集合值差
+	 * @Description: 计算矩阵值差
 	 * @param: a1
 	 *             被减数
 	 * @param a2
 	 *            减数
 	 * @return ArrayList<ArrayList<Double>> @throws
 	 */
-	public static ArrayList<Double> matrixMinus(ArrayList<Double> a1, ArrayList<Double> a2)
+	public static ArrayList<ArrayList<Double>> matrixMinus(ArrayList<ArrayList<Double>> a1,
+			ArrayList<ArrayList<Double>> a2)
 	{
-		ArrayList<Double> res = new ArrayList<Double>();
-		for (int i = 0; i < a1.size(); i++)
+		if (a1.size() == a2.size() && a1.get(0).size() == a2.get(0).size())
 		{
-			res.add(a1.get(i) - a2.get(i));
+			ArrayList<ArrayList<Double>> res = new ArrayList<>();
+			for (int i = 0; i < a1.size(); i++)
+			{
+				res.add(arrayMinus(a1.get(i), a2.get(i)));
+			}
+			return res;
+		} else
+		{
+			System.out.print("the arraylist1 and arraylist2 is not comparable");
+			System.exit(1);
+			return null;
+
 		}
-		return res;
+	}
+
+	/**
+	 * 求两个向量的差
+	 * 
+	 * @param a1
+	 * @param a2
+	 * @return
+	 */
+	public static ArrayList<Double> arrayMinus(ArrayList<Double> a1, ArrayList<Double> a2)
+	{
+
+		if (a1.size() != a2.size())
+		{
+			System.out.print("the arraylist1 and arraylist2 is not comparable");
+			System.exit(1);
+			return null;
+
+		} else
+		{
+			ArrayList<Double> result = new ArrayList<>();
+			for (int i = 0; i < a1.size(); i++)
+			{
+				result.add(a1.get(i) - a2.get(i));
+			}
+			return result;
+		}
+
 	}
 
 	/**
@@ -384,13 +476,14 @@ public class GMMUtil
 	}
 
 	/**
-	 * ArrayList<double> to double[0][] 将一个double数组变成一个矩阵的第一行
+	 * ArrayList<Double> to double[0][] 将一个double数组变成一个矩阵的第一行
 	 * 
 	 * @param a
 	 * @return
 	 */
 	public static double[][] toArray1(ArrayList<Double> a)
 	{
+
 		int dataDimen = a.size();
 		double[][] res = new double[1][dataDimen];
 
@@ -445,6 +538,33 @@ public class GMMUtil
 		return res;
 	}
 
+	/**
+	 * 二维double数组输出
+	 * 
+	 * @param arrayList
+	 * @return
+	 */
+	public static String Array2ToString(ArrayList<ArrayList<Double>> arrayList)
+	{
+
+		String result = "[";
+		for (ArrayList<Double> aDoubles : arrayList)
+		{
+			result += aDoubles.toString() + ",";
+		}
+		result = result.substring(0, result.length() - 1);
+		result += "]";
+		return result;
+
+	}
+
+	public static String Array2ToString(double[][] arrayList)
+	{
+		ArrayList<ArrayList<Double>> arrayList2 = GMMUtil.toList(arrayList);
+		return GMMUtil.Array2ToString(arrayList2);
+
+	}
+
 	static void process8uC1(final ArrayList<ArrayList<Double>> image, ArrayList<ArrayList<Double>> fgmask,
 			double learningRate, ArrayList<ArrayList<Double>> bgmodel, int nmixtures, double backgroundRatio,
 			double varThreshold, double noiseSigma)
@@ -452,7 +572,8 @@ public class GMMUtil
 		int x, y, k, k1, rows = image.size(), cols = image.get(0).size();
 		double alpha = (double) learningRate, T = (double) backgroundRatio, vT = (double) varThreshold;// 学习速率、背景门限、方差门限
 		int K = nmixtures;// 混合模型个数
-		ArrayList<MixData> mptr = new ArrayList<MixData>();/* = bgmodel.data*/;
+		ArrayList<MixData> mptr = new ArrayList<MixData>();
+		/* = bgmodel.data */;
 
 		final double w0 = (double) defaultInitialWeight;// 初始权值
 		final double sk0 = (double) (w0 / (defaultNoiseSigma * 2));// 初始优先级
@@ -578,5 +699,59 @@ public class GMMUtil
 				}
 			}
 		}
+	}
+
+	public static void main(String[] args)
+	{
+		ArrayList<ArrayList<Double>> dataSet = new ArrayList<>();
+
+		Random random = new Random();
+		for (int i = 0; i < 4; i++)
+		{
+			ArrayList<Double> temp = new ArrayList<>();
+			for (int j = 0; j < 5; j++)
+			{
+				temp.add((double) random.nextInt(10));
+
+			}
+			dataSet.add(temp);
+
+		}
+		System.out.println(GMMUtil.Array2ToString(dataSet));
+		ArrayList<ArrayList<Double>> dataSet2 = new ArrayList<>();
+
+		for (int i = 0; i < 5; i++)
+		{
+			ArrayList<Double> temp = new ArrayList<>();
+			for (int j = 0; j < 4; j++)
+			{
+				temp.add((double) random.nextInt(10));
+
+			}
+			dataSet2.add(temp);
+
+		}
+		System.out.println(GMMUtil.Array2ToString(dataSet2));
+
+		double[][] d = GMMUtil.matrixMultiply(GMMUtil.toArray(dataSet), GMMUtil.toArray(dataSet2));
+		System.out.println(GMMUtil.Array2ToString(d));
+
+		ArrayList<Double> test = new ArrayList<>();
+		ArrayList<Double> mean = new ArrayList<>();
+		ArrayList<Double> cov = new ArrayList<>();
+		for (int j = 0; j < 4; j++)
+		{
+			test.add((double) random.nextInt(10));
+			mean.add((double) random.nextInt(10));
+			cov.add((double) random.nextInt(20));
+
+		}
+		System.out.println("hello");
+		System.out.println(test.toString());
+		System.out.println(mean.toString());
+		System.out.println(cov.toString());
+		System.out.println(computeMahalanobisDistance(test, mean, cov));
+
+		
 	}
 }
