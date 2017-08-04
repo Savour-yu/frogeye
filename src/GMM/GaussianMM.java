@@ -17,18 +17,64 @@ public class GaussianMM
 	private ArrayList<Model> models = new ArrayList<Model>();
 	// private double defaultAlpha = 0.01;// 默认学习率 default learning rate
 	private double diffRatio = 2.5;// 差异率，我们定义这个为论文中的lambda，也就是马氏距离能容忍的范围
+	private ArrayList<Double> tempVec = new ArrayList<Double>();
+	private int dimension = 3;
 
-	public GaussianMM(ArrayList<ArrayList<Double>> dataset, int K)
+	public GaussianMM(int K, int dimension)
 	{
 
 		// TODO Auto-generated constructor stub
 		this.K = K;
-		// GenerateCenters gc = new GenerateCenters(dataset, K);
-		// ArrayList<ArrayList<Double>> centers = gc.getCenters();
-		// for (ArrayList<Double> item : centers)
-		// {
-		// mixtureModel.add(new Model(item));
-		// }
+		this.dimension = dimension;
+		BufferedReader br;
+		String data = null;
+		for (int i = 0; i < dimension; i++)
+		{
+			tempVec.add(0.0);
+		}
+		List<ArrayList<Double>> dataList = new ArrayList<ArrayList<Double>>();
+		try
+		{
+			br = new BufferedReader(new InputStreamReader(new FileInputStream("D:\\Frame.log")));
+
+			while ((data = br.readLine()) != null)
+			{
+				// System.out.println(data);
+				String[] fields = data.split(",");
+				ArrayList<Double> tmpList = new ArrayList<Double>();
+				tmpList.add(0.0);
+				tmpList.add(0.0);
+				dataList.add(tmpList);
+				if (Double.parseDouble(fields[2]) < 1.1)
+				{
+					tmpList.set(0, Double.parseDouble(fields[1]));
+				} else
+				{
+					tmpList.set(1, Double.parseDouble(fields[1]));
+				}
+			}
+			br.close();
+		} catch (FileNotFoundException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		GenerateCenters gc = new GenerateCenters(dataList, this.K);
+		ArrayList<ArrayList<Double>> centers = gc.getCenters();
+		for (ArrayList<Double> item : centers)
+		{
+			models.add(new Model(item));
+		}
+
+	}
+
+	public void receiveData(int RSSI, int index)
+	{
 
 	}
 
@@ -36,6 +82,7 @@ public class GaussianMM
 	 * 计算测试数据在高斯混合模型中的概率
 	 * 
 	 * @param test
+	 *            待测数据向量
 	 * @return
 	 */
 	private double computeProbability(ArrayList<Double> test)
@@ -129,8 +176,14 @@ public class GaussianMM
 		else
 		{
 			Model model = new Model(aFrame);
-			if (models.get(models.size() - 1).getRank() > model.getRank())
-				models.set(models.size() - 1, model);
+			// 倒数第二个模型的排序大于默认模型，否则一直将weight缩小直到插入的是最小模型
+			while (models.get(models.size() - 2).getRank() < model.getRank())
+			{
+				model.setWeight(model.getWeight() / 2);
+			}
+			models.set(models.size() - 1, model);
+			Model.rejustWeight(models);// 调整权重
+
 		}
 	}
 
@@ -152,7 +205,7 @@ public class GaussianMM
 		List<ArrayList<Double>> dataList = new ArrayList<ArrayList<Double>>();
 		try
 		{
-			br = new BufferedReader(new InputStreamReader(new FileInputStream("D:\\iris.dat")));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream("D:\\Frame.log")));
 
 			while ((data = br.readLine()) != null)
 			{
@@ -174,7 +227,7 @@ public class GaussianMM
 			e.printStackTrace();
 		}
 
-		GaussianMM gMm = new GaussianMM((ArrayList<ArrayList<Double>>) dataList, 3);
+		GaussianMM gMm = new GaussianMM(3, 3);
 		GenerateCenters gc = new GenerateCenters(dataList, gMm.K);
 		ArrayList<ArrayList<Double>> centers = gc.getCenters();
 		for (ArrayList<Double> item : centers)

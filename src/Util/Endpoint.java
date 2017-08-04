@@ -852,6 +852,7 @@ public class Endpoint implements LLRPEndpoint
 			List<TagReportData> tdlist1 = report1.getTagReportDataList();
 			for (TagReportData tr : tdlist1)
 			{
+				
 				Frame.decodeTagReport(tr);
 
 				logOneTagReport(tr);
@@ -884,117 +885,6 @@ public class Endpoint implements LLRPEndpoint
 
 	}
 
-	// public void addAccessSpec()
-	// {
-	// LLRPMessage response;
-	//
-	// logger.info("Loading ADD_ACCESSSPEC message from file ADD_ACCESSSPEC.xml
-	// ...");
-	// try
-	// {
-	// LLRPMessage addAccessMsg = Util.loadXMLLLRPMessage(new
-	// File("D:\\ADD_ACCESSSPEC.xml"));
-	// // TODO make sure this is an SET_READER_CONFIG message
-	// ADD_ACCESSSPEC addAccessSpec = (ADD_ACCESSSPEC) addAccessMsg;
-	// AccessSpec aSpec = addAccessSpec.getAccessSpec();
-	//
-	// AccessCommand aCommand = aSpec.getAccessCommand();
-	// C1G2TagSpec c1g2TagSpec = (C1G2TagSpec) aCommand.getAirProtocolTagSpec();
-	// C1G2TargetTag c1g2TargetTag = c1g2TagSpec.getC1G2TargetTagList().get(0);
-	// c1g2TargetTag.setMatch(new Bit(true));
-	// c1g2TargetTag.setMB(new TwoBitField("1"));
-	// c1g2TargetTag.setPointer(new UnsignedShort(32));
-	// c1g2TargetTag.setTagMask(new BitArray_HEX("ffffffffffffffffffffffff"));
-	// c1g2TargetTag.setTagData(new BitArray_HEX("222222222222222222222222"));
-	// C1G2Write write = new C1G2Write();
-	// write.setAccessPassword(new UnsignedInteger(0));
-	// write.setMB(new TwoBitField("2"));
-	// write.setWordPointer(new UnsignedShort("0"));
-	// write.setOpSpecID(new UnsignedShort("2"));
-	// write.setWriteData(new UnsignedShortArray_HEX("1111"));
-	// aCommand.addToAccessCommandOpSpecList(write);
-	// // commandlist.add();
-	// // TODO WRITE I have no idea
-	// response = connection.transact(addAccessMsg, 10000);
-	//
-	// // check whetherSET_READER_CONFIG addition was successful
-	// StatusCode status = ((ADD_ACCESSSPEC_RESPONSE)
-	// response).getLLRPStatus().getStatusCode();
-	// if (status.equals(new StatusCode("M_Success")))
-	// {
-	// logger.info("ADD_ACCESSSPEC was successful");
-	//
-	// // save a copy for later
-	// accessspec = ((ADD_ACCESSSPEC) addAccessMsg).getAccessSpec();
-	// } else
-	// {
-	// logger.info(response.toXMLString());
-	// logger.info("ADD_ACCESSSPEC failures");
-	// System.exit(1);
-	// }
-	//
-	// } catch (TimeoutException ex)
-	// {
-	// logger.error("Timeout waiting for ADD_ACCESSSPEC response");
-	// System.exit(1);
-	// } catch (FileNotFoundException ex)
-	// {
-	// logger.error("Could not find file");
-	// System.exit(1);
-	// } catch (IOException ex)
-	// {
-	// logger.error("IO Exception on file");
-	// System.exit(1);
-	// } catch (JDOMException ex)
-	// {
-	// logger.error("Unable to convert LTK-XML to DOM");
-	// System.exit(1);
-	// } catch (InvalidLLRPMessageException ex)
-	// {
-	// logger.error("Unable to convert LTK-XML to Internal Object");
-	// System.exit(1);
-	// }
-	// }
-
-	// public void enableAccess()
-	// {
-	// LLRPMessage response;
-	// try
-	// {
-	// // factory default the reader
-	// logger.info("ENABLE_ACCESSSPEC ...");
-	// ENABLE_ACCESSSPEC ena = new ENABLE_ACCESSSPEC();
-	// ena.setMessageID(getUniqueMessageID());
-	// ena.setAccessSpecID(accessspec.getAccessSpecID());
-	//
-	// response = connection.transact(ena, 10000);
-	//
-	// // check whether ROSpec addition was successful
-	// StatusCode status = ((ENABLE_ACCESSSPEC_RESPONSE)
-	// response).getLLRPStatus().getStatusCode();
-	// if (status.equals(new StatusCode("M_Success")))
-	// {
-	// logger.info("ENABLE_ACCESSSPEC was successful");
-	// } else
-	// {
-	// logger.error(response.toXMLString());
-	// logger.info("ENABLE_ACCESSSPEC failed ");
-	// System.exit(1);
-	// }
-	// } catch (Exception e)
-	// {
-	// e.printStackTrace();
-	// System.exit(1);
-	// }
-	// }
-
-	// public void getReport()
-	// {
-	// GET_REPORT grep = new GET_REPORT();
-	// grep.setMessageID(getUniqueMessageID());
-	// logger.info("Sending GET_REPORT ...");
-	// connection.send(grep);
-	// }
 
 	public void enable_notification()
 	{
@@ -1013,41 +903,6 @@ public class Endpoint implements LLRPEndpoint
 		}
 	}
 
-	// to get former AccessSpec
-	// public void getAccessSpec()
-	// {
-	// LLRPMessage response;
-	// GET_ACCESSSPECS_RESPONSE gasr;
-	// GET_ACCESSSPECS get = new GET_ACCESSSPECS();
-	// AccessSpec accessSpec = new AccessSpec();
-	// get.setMessageID(getUniqueMessageID());
-	// logger.info("sending GET_ACCESSSPEC message...");
-	// try
-	// {
-	// response = connection.transact(get);
-	// gasr = (GET_ACCESSSPECS_RESPONSE) response;
-	// StatusCode status = gasr.getLLRPStatus().getStatusCode();
-	// if (status.equals(new StatusCode("M_Success")))
-	// {
-	// logger.info("GET_ACCESSSPEC was successful");
-	// List<AccessSpec> aList = gasr.getAccessSpecList();
-	// if (!aList.isEmpty())
-	// {
-	// logger.info("accesspeclist size==" + aList.size());
-	// AccessCommand accessCommand = aList.get(0).getAccessCommand();
-	// List<AccessCommandOpSpec> aclist =
-	// accessCommand.getAccessCommandOpSpecList();
-	// AccessCommandOpSpec accessCommandOpSpec = aclist.get(0);
-	// logger.info("GETCLASS=" + accessCommandOpSpec.getClass().toString());
-	// }
-	// }
-	// } catch (TimeoutException e)
-	// {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	//
-	// }
 
 	/**
 	 * @param args

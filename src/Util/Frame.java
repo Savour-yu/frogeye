@@ -7,10 +7,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.jfree.chart.event.ChartChangeEvent;
 import org.llrp.ltk.generated.parameters.EPCData;
 import org.llrp.ltk.generated.parameters.EPC_96;
 import org.llrp.ltk.generated.parameters.TagReportData;
 import org.llrp.ltk.types.LLRPParameter;
+
+import GMM.GaussianMM;
+import drawChart.RSSIChart;
 
 public class Frame
 {
@@ -27,7 +31,9 @@ public class Frame
 	// private static int[] countAnt = new int[antNum];
 	private static int countTagReport = 0;
 	private static int[] countFull = new int[antNum]; // count the full RSSI in unit
-
+	private static ArrayList<RSSIChart> charts = new ArrayList<>();
+	private static boolean initedFlag = false;
+	private static ArrayList<GaussianMM> gmms =  new ArrayList<>();
 	public Frame()
 	{
 
@@ -74,8 +80,10 @@ public class Frame
 
 		if (tagEpcList.contains(aEPC))
 		{
-			logger.error(String.format("[%-5d]\t[%-3d]\t%s\t%d\t%d", countTagReport, tagEpcList.indexOf(aEPC), aEPC,
+			logger.error(String.format("[%-5d]\t[%-3d]\t%s\t,%d,%d", countTagReport, tagEpcList.indexOf(aEPC), aEPC,
 					RSSI, AntennaID));
+			int index = tagEpcList.indexOf(aEPC);
+			charts.get(index).receiveData(RSSI, AntennaID);
 			// logger.error(String.format("%s", aEPC));
 
 			// int index = tagEpcList.indexOf(aEPC);
@@ -94,11 +102,12 @@ public class Frame
 			// // take the first readLength unit to Guassian
 			// }
 			// }
-		} else if (RSSI > -43)
-		{
-			tagEpcList.add(aEPC);
-
 		}
+		// else if (RSSI > -43)
+		// {
+		// tagEpcList.add(aEPC);
+		//
+		// }
 		countTagReport++;
 
 	}
@@ -127,6 +136,15 @@ public class Frame
 		{
 			System.out.println("读取文件内容出错");
 			e.printStackTrace();
+		}
+		if (!initedFlag)
+		{
+			for (String Epc : tagEpcList)
+			{
+				charts.add(new RSSIChart("RSSI of tag " + Epc, "Time Serials"));
+//				gmms.add(new GaussianMM(dataset, 10));
+			}
+			initedFlag = true;
 		}
 	}
 
