@@ -115,7 +115,12 @@ import org.llrp.ltk.util.Util;
 //import Adapter.TableModel;
 //import Layout.Window;
 //import func.*;
-
+/**
+ * 终端，即上位机，负责连接阅读器，对阅读器进行配置，接收阅读器收到的消息
+ * 
+ * @author Yu
+ *
+ */
 public class Endpoint implements LLRPEndpoint
 {
 	private LLRPConnection connection;
@@ -166,6 +171,11 @@ public class Endpoint implements LLRPEndpoint
 		logger.error(arg0);
 	}
 
+	/**
+	 * 连接阅读器，通过IP连接，即阅读器与终端上位机处于同一个局域网内
+	 * 
+	 * @param ip
+	 */
 	public void connect(String ip)
 	{
 		// create client-initiated LLRP connection
@@ -186,6 +196,9 @@ public class Endpoint implements LLRPEndpoint
 		}
 	}
 
+	/**
+	 * 断开与阅读器的连接
+	 */
 	public void disconnect()
 	{
 		LLRPMessage response;
@@ -282,6 +295,9 @@ public class Endpoint implements LLRPEndpoint
 		}
 	}
 
+	/**
+	 * 连接阅读器后查看阅读器基本信息
+	 */
 	public void getReaderCapabilities()
 	{
 		LLRPMessage response;
@@ -349,10 +365,8 @@ public class Endpoint implements LLRPEndpoint
 	}
 
 	/**
-	 * decode and log the response Msg from Reader after we configured the Reader
-	 * 
-	 * @param nothing
-	 * @return nothing
+	 * 获取阅读器的配置信息
+	 *
 	 * 
 	 */
 	public void getReaderConfiguration()
@@ -852,25 +866,16 @@ public class Endpoint implements LLRPEndpoint
 			List<TagReportData> tdlist1 = report1.getTagReportDataList();
 			for (TagReportData tr : tdlist1)
 			{
-				
+
 				Frame.decodeTagReport(tr);
-
-				logOneTagReport(tr);
-				// for (int i = 0; i < dVector.size(); i++)
-				// {
-				// String[] aTagRspd = dVector.get(i);
-				//// logger2.fatal(String.format("[%s]\t%s\t%s\t%s", aTagRspd[0], aTagRspd[1],
-				//// aTagRspd[5] != null ? aTagRspd[5] : 90, aTagRspd[10]));
-				//
-				// }
-
+//				logOneTagReport(tr);
 				count1++;
 			}
-			List<Custom> clist1 = report1.getCustomList();
-			for (Custom cust : clist1)
-			{
-				logOneCustom(cust);
-			}
+//			List<Custom> clist1 = report1.getCustomList();
+//			for (Custom cust : clist1)
+//			{
+//				logOneCustom(cust);
+//			}
 		} else if (message.getTypeNum() == READER_EVENT_NOTIFICATION.TYPENUM)
 		{
 			// TODO
@@ -884,7 +889,6 @@ public class Endpoint implements LLRPEndpoint
 		}
 
 	}
-
 
 	public void enable_notification()
 	{
@@ -903,13 +907,12 @@ public class Endpoint implements LLRPEndpoint
 		}
 	}
 
-
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args)
 	{
-		Frame.setEPCListFromFile("D:\\EPCList.txt");
+		Frame.initFrame(2, "D:\\EPCList.txt");
 		BasicConfigurator.configure();
 
 		if (args.length < 1)

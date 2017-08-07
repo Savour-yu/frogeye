@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 import org.jfree.chart.event.ChartChangeEvent;
@@ -12,6 +13,8 @@ import org.llrp.ltk.generated.parameters.EPCData;
 import org.llrp.ltk.generated.parameters.EPC_96;
 import org.llrp.ltk.generated.parameters.TagReportData;
 import org.llrp.ltk.types.LLRPParameter;
+import org.omg.CORBA.PRIVATE_MEMBER;
+import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 
 import GMM.GaussianMM;
 import drawChart.RSSIChart;
@@ -24,18 +27,144 @@ public class Frame
 	private static ArrayList<String> tagEpcList = new ArrayList<String>();// we use that to store all tag EPC we monitor
 	private static int countFrame = 0;// to count the num of all frame from we run the program
 	private static Logger logger = Logger.getLogger("FrameLog");// log every Frame and some error
-	private static int[][][] unit = new int[tagNum][(int) (readLength * 1.3)][antNum];
-	private static int[][] countRead = new int[tagNum][antNum];// to count the num of read for every tag,a read contains
-																// antNum
-	// RSSI
-	// private static int[] countAnt = new int[antNum];
-	private static int countTagReport = 0;
-	private static int[] countFull = new int[antNum]; // count the full RSSI in unit
+	private static int count = 0;
+
+	private static double[][][] unit;
+	// to count the num of read for every tag,a read contains antNum RSSI
+	private static int[][] countRead;
+	private static boolean[] countFull; // count the full RSSI in unit
+
 	private static ArrayList<RSSIChart> charts = new ArrayList<>();
 	private static boolean initedFlag = false;
-	private static ArrayList<GaussianMM> gmms =  new ArrayList<>();
+	private static ArrayList<GaussianMM> gmms = new ArrayList<>();
+	private static int countTagReport = 0;
+	private static ArrayList<Integer> antennaList = new ArrayList<>();
+
+	private static boolean flag = true;
+
 	public Frame()
 	{
+
+	}
+
+	/**
+	 * 将单位全部默认置为-90.0
+	 */
+	private static void initUnit()
+	{
+		for (int i = 0; i < unit.length; i++)
+		{
+			for (int j = 0; j < unit[0].length; j++)
+			{
+				for (int k = 0; k < unit[0][0].length; k++)
+				{
+					unit[i][j][k] = -90.0;
+				}
+			}
+		}
+	}
+
+	private static void clearRecord()
+	{
+		initUnit();
+		// to count the num of read for every tag,a read contains antNum RSSI
+		countRead = new int[tagNum][antNum];
+		countFull = new boolean[tagNum]; // count the full RSSI in unit
+		count = 0;
+	}
+
+	/**
+	 * 初始化帧，设置EPClist，初始化单位，设置天线list
+	 */
+	public static void initFrame(int antNum, String EPCFilePath)
+	{
+		// TODO Auto-generated method stub
+		if (!initedFlag)
+		{
+
+			Frame.antNum = antNum;
+			for (int i = 0; i < antNum; i++)
+			{
+				antennaList.add(i + 1);
+			}
+			setEPCListFromFile(EPCFilePath);
+			tagNum = tagEpcList.size();
+
+			unit = new double[tagNum][(int) (readLength * 1.3)][antNum];
+			initUnit();
+			// to count the num of read for every tag,a read contains antNum RSSI
+			countRead = new int[tagNum][antNum];
+			countFull = new boolean[tagNum]; // count the full RSSI in unit
+			logger.error("epclist:" + tagEpcList.toString());
+			logger.error("antennaList:" + antennaList.toString());
+			logger.error("tagNum:" + tagNum);
+			initedFlag = true;
+		}
+	}
+
+	// take the (epc,rssi,antennnaID) as input,,then make a unit(frame)
+	private static void makeAUnit(String epc, double RSSI, int AntennaID)
+	{
+		// TODO Auto-generated method stub
+
+		logger.error("count:" + count);
+		int EPCIndex = tagEpcList.indexOf(epc);
+		int AntIndex = antennaList.indexOf(AntennaID);
+		unit[EPCIndex][countRead[EPCIndex][AntIndex]][AntIndex] = RSSI;
+		logger.error("epcIndex:" + EPCIndex + "\tantIndex:" + AntIndex);
+		// 判断什么时候完成了一帧数据，由于来的数据是不一定的
+		// 对于一个 标签，无论哪根天线读取满了1.3*length次，都认为这个标签读取完成，当完成的标签超过标签数量的0.8时，我们认为一帧数据收集完成
+		if ((countRead[EPCIndex][AntIndex]) < ((int) (readLength * 1.2)))
+		{
+			countRead[EPCIndex][AntIndex]++;
+			logger.error("success4");
+
+		} else
+		{
+			// 某个标签的某根天线读满了
+			// countFull[EPCIndex] = true;
+			logger.error("success3");
+			countRead[EPCIndex][AntIndex] = 0;
+
+		}
+		logger.error("success0\t" + countRead[EPCIndex][AntIndex]);
+//		for (int i = 0; i < tagNum; i++)
+//		{
+//
+//			if (countFull[i])
+//			{
+//				count++;
+//				logger.error("success1");
+//			}
+//
+//		}
+//		// 某根天线读满的标签数量超过总数的0.8
+//
+//		if (count >= 0.8 * tagNum)
+//		{
+//			logger.error("success2");
+//			double[][][] frame = new double[tagNum][readLength][antNum];
+//			// 截取前面的readlength次读
+//			for (int i = 0; i < tagNum; i++)
+//			{
+//				for (int j = 0; j < readLength; j++)
+//				{
+//					for (int k = 0; k < antNum; k++)
+//					{
+//						frame[i][j][k] = unit[i][j][k];
+//					}
+//				}
+//			}
+//			clearRecord();
+//			// 将frame传给GMM
+//			for (int i = 0; i < readLength; i++)
+//			{
+//
+////				gmms.get(EPCIndex).fit(GMMUtil.toList(frame[EPCIndex]).get(i), 0.05);
+//				logger.error(gmms.get(EPCIndex).toString());
+//			}
+//
+//		}
 
 	}
 
@@ -51,9 +180,14 @@ public class Frame
 	public static void decodeTagReport(TagReportData aTagReportData)
 	{
 		// First, we try to get EPC
+		if (!initedFlag)
+		{
+			return;
+		}
+
 		LLRPParameter epcp = (LLRPParameter) aTagReportData.getEPCParameter();
 		String aEPC;
-		int RSSI;
+		double RSSI;
 		int AntennaID;
 		if ((epcp != null) && (aTagReportData.getPeakRSSI() != null) && (aTagReportData.getAntennaID() != null))
 		{
@@ -70,7 +204,7 @@ public class Frame
 				logger.error("Could not find EPC in Tag Report");
 				return;
 			}
-			RSSI = Integer.parseInt(aTagReportData.getPeakRSSI().getPeakRSSI().toString());
+			RSSI = Double.parseDouble(aTagReportData.getPeakRSSI().getPeakRSSI().toString());
 			AntennaID = Integer.parseInt(aTagReportData.getAntennaID().getAntennaID().toString());
 		} else
 		{
@@ -78,17 +212,19 @@ public class Frame
 			return;
 		}
 
-		if (tagEpcList.contains(aEPC))
+		if (tagEpcList.contains(aEPC) && antennaList.contains(AntennaID))
 		{
-			logger.error(String.format("[%-5d]\t[%-3d]\t%s\t,%d,%d", countTagReport, tagEpcList.indexOf(aEPC), aEPC,
+			logger.error(String.format("[%-5d]\t[%-3d]\t%s\t,%f,%d", countTagReport, tagEpcList.indexOf(aEPC), aEPC,
 					RSSI, AntennaID));
 			int index = tagEpcList.indexOf(aEPC);
+			makeAUnit(aEPC, RSSI, AntennaID);
 			charts.get(index).receiveData(RSSI, AntennaID);
 			// logger.error(String.format("%s", aEPC));
+			
 
-			// int index = tagEpcList.indexOf(aEPC);
 			// unit[index][countRead[index][AntennaID - 1]][AntennaID - 1] = RSSI;
-			// if (countRead[index][AntennaID - 1] < ((int) readLength * 1.3))
+			// // 判断什么时候完成了一帧数据，由于来的数据是随机的
+			// if (countRead[index][AntennaID - 1] < ((int) readLength * 1.2))
 			// {
 			// countRead[index][AntennaID - 1]++;
 			// } else
@@ -99,15 +235,22 @@ public class Frame
 			// {
 			// if (countFull[i] >= tagNum * 0.8)
 			// {
-			// // take the first readLength unit to Guassian
+			// // take the head readLength unit to Guassian
 			// }
 			// }
 		}
-		// else if (RSSI > -43)
+		// else if (RSSI > -46)
 		// {
 		// tagEpcList.add(aEPC);
-		//
+		// logger.error(String.format("[%-5d]\t[%-3d]\t%s\t,%f,%d", countTagReport,
+		// tagEpcList.indexOf(aEPC), aEPC,
+		// RSSI, AntennaID));
 		// }
+		else
+		{
+			// logger.error(String.format("[%-5d]\t[%-3d]\t%s\t,%f,%d", countTagReport, -1,
+			// aEPC, RSSI, AntennaID));
+		}
 		countTagReport++;
 
 	}
@@ -137,16 +280,21 @@ public class Frame
 			System.out.println("读取文件内容出错");
 			e.printStackTrace();
 		}
-		if (!initedFlag)
+
+		for (String Epc : tagEpcList)
 		{
-			for (String Epc : tagEpcList)
-			{
-				charts.add(new RSSIChart("RSSI of tag " + Epc, "Time Serials"));
-//				gmms.add(new GaussianMM(dataset, 10));
-			}
-			initedFlag = true;
+			charts.add(new RSSIChart("RSSI of tag " + Epc, "Time Serials"));
+			gmms.add(new GaussianMM(10, antNum));
 		}
+
 	}
+
+	// private static void initGMM()
+	// {
+	// for(int i =0;i<tagEpcList.size();i++) {
+	// gmms.add(new GaussianMM(10, antNum));
+	// }
+	// }
 
 	public static void main(String[] args)
 	{

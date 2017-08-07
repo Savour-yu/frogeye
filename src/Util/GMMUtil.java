@@ -60,8 +60,15 @@ public class GMMUtil
 		double[][] AT = toArray1(diff);// 向量转换成矩阵的第一行,此矩阵为差向量的转置。一行N列
 		double[][] A = matrixReverse(AT);// 转置矩阵的转置为差向量,N行一列
 		// 马氏距离为AT*B-1*A，其中A为数据与均值的差，AT是其转置，B为协方差矩阵，B-1是协方差矩阵的逆,1*d * d*d * d*1
-		// 首先我们将协方差向量还原为协方差矩阵
-		double[][] covMatrix = diag(toArray1(cov)[0]);
+
+		// 首先将协方差转换为协方差的倒数，省去求逆过程，非对角矩阵求逆没有这么简单
+		ArrayList<Double> covInverse = new ArrayList<>(cov);
+		for (int i = 0; i < covInverse.size(); i++)
+		{
+			covInverse.set(i, 1 / covInverse.get(i));
+		}
+		// 然后我们将协方差向量的倒数还原为协方差矩阵的逆
+		double[][] covMatrix = diag(toArray1(covInverse)[0]);
 		// 然后我们将三者乘积计算出来，乘积的结果为1*1的矩阵，其中唯一的元素就是马氏距离
 		double[][] temp = matrixMultiply(AT, covMatrix);
 		MahalanobisDistance = matrixMultiply(temp, A)[0][0];
@@ -565,142 +572,6 @@ public class GMMUtil
 
 	}
 
-	static void process8uC1(final ArrayList<ArrayList<Double>> image, ArrayList<ArrayList<Double>> fgmask,
-			double learningRate, ArrayList<ArrayList<Double>> bgmodel, int nmixtures, double backgroundRatio,
-			double varThreshold, double noiseSigma)
-	{
-		int x, y, k, k1, rows = image.size(), cols = image.get(0).size();
-		double alpha = (double) learningRate, T = (double) backgroundRatio, vT = (double) varThreshold;// 学习速率、背景门限、方差门限
-		int K = nmixtures;// 混合模型个数
-		ArrayList<MixData> mptr = new ArrayList<MixData>();
-		/* = bgmodel.data */;
-
-		final double w0 = (double) defaultInitialWeight;// 初始权值
-		final double sk0 = (double) (w0 / (defaultNoiseSigma * 2));// 初始优先级
-		final double var0 = (double) (defaultNoiseSigma * defaultNoiseSigma * 4);// 初始方差
-		final double minVar = (double) (noiseSigma * noiseSigma);// 最小方差
-
-		for (y = 0; y < rows; y++)
-		{
-			final ArrayList<Double> src = image.get(y);
-			ArrayList<Double> dst = fgmask.get(y);
-
-			if (alpha > 0)// 如果学习速率为0，则退化为背景相减
-			{
-				int m = 0;
-				for (x = 0; x < cols; x++, m += K)
-				{
-					double wsum = 0;
-					Double pix = src.get(x);// 每个像素
-					int kHit = -1, kForeground = -1;// 是否属于模型，是否属于前景
-
-					for (k = 0; k < K; k++)// 每个高斯模型
-					{
-						double w = mptr.get(m + k).weight;// 当前模型的权值
-						wsum += w;// 权值累加
-						if (w < FLT_EPSILON)
-							break;
-						Double mu = mptr.get(m + k).mean;// 当前模型的均值
-						double var = mptr.get(m + k).var;// 当前模型的方差
-						double diff = pix - mu;// 当前像素与模型均值之差
-						double d2 = diff * diff;// 平方
-						if (d2 < vT * var)// 是否小于方门限，即是否属于该模型
-						{
-							wsum -= w;// 如果匹配，则把它减去，因为之后会更新它
-							double dw = alpha * (1.f - w);
-							mptr.get(m + k).weight = w + dw;// 增加权值
-							// 注意源文章中涉及概率的部分多进行了简化，将概率变为1
-							mptr.get(m + k).mean = mu + alpha * diff;// 修正均值
-							var = Math.max(var + alpha * (d2 - var), minVar);// 开始时方差清零0，所以这里使用噪声方差作为默认方差，否则使用上一次方差
-							mptr.get(m + k).var = var;// 修正方差
-							mptr.get(m + k).sortKey = w / Math.sqrt(var);// 重新计算优先级，貌似这里不对，应该使用更新后的mptr[k].weight而不是w
-
-							for (k1 = k - 1; k1 >= 0; k1--)// 从匹配的第k个模型开始向前比较，如果更新后的单高斯模型优先级超过他前面的那个，则交换顺序
-							{
-								if (mptr.get(m + k1).sortKey >= mptr.get(m + k1 + 1).sortKey)// 如果优先级没有发生改变，则停止比较
-									break;
-
-								MixData temp = new MixData();
-								temp = mptr.get(m + k1 + 1);
-								mptr.set(m + k1 + 1, mptr.get(m + k1));
-								mptr.set(m + k1, temp);// 交换它们的顺序，始终保证优先级最大的在前面
-							}
-
-							kHit = k1 + 1;// 记录属于哪个模型
-							break;
-						}
-					}
-
-					if (kHit < 0) // no appropriate gaussian mixture found at all, remove the weakest mixture and
-									// create a new one
-									// 当前像素不属于任何一个模型
-					{
-						// 初始化一个新模型
-						kHit = k = Math.min(k, K - 1);// 有两种情况，当最开始的初始化时，k并不是等于K-1的
-						wsum += w0 - mptr.get(m + k).weight;// 从权值总和中减去原来的那个模型，并加上默认权值
-						mptr.get(m + k).weight = w0;// 初始化权值
-						mptr.get(m + k).mean = pix;// 初始化均值
-						mptr.get(m + k).var = var0; // 初始化方差
-						mptr.get(m + k).sortKey = sk0;// 初始化权值
-					} else
-						for (; k < K; k++)
-							wsum += mptr.get(m + k).weight;// 求出剩下的总权值
-
-					double wscale = 1.f / wsum;// 归一化
-					wsum = 0;
-					for (k = 0; k < K; k++)
-					{
-						wsum += mptr.get(m + k).weight *= wscale;
-						mptr.get(m + k).sortKey *= wscale;// 计算归一化权值
-						if (wsum > T && kForeground < 0)
-							kForeground = k + 1;// 第几个模型之后就判为前景了
-					}
-					dst.set(x, (double) ((kHit >= kForeground) ? 255 : 0));// 判决：(ucahr)(-true) = 255;(uchar)(-(false))
-																			// = 0;
-				}
-			} else// 如果学习速率小于等于0，则没有背景更新过程，其他过程类似
-			{
-				int m = 0;
-				for (x = 0; x < cols; x++, m += K)
-				{
-					double pix = src.get(x);
-					int kHit = -1, kForeground = -1;
-
-					for (k = 0; k < K; k++)
-					{
-						if (mptr.get(m + k).weight < FLT_EPSILON)
-							break;
-						double mu = mptr.get(m + k).mean;
-						double var = mptr.get(m + k).var;
-						double diff = pix - mu;
-						double d2 = diff * diff;
-						if (d2 < vT * var)
-						{
-							kHit = k;
-							break;
-						}
-					}
-
-					if (kHit >= 0)
-					{
-						double wsum = 0;
-						for (k = 0; k < K; k++)
-						{
-							wsum += mptr.get(m + k).weight;
-							if (wsum > T)
-							{
-								kForeground = k + 1;
-								break;
-							}
-						}
-					}
-
-					dst.set(x, (double) (kHit < 0 || kHit >= kForeground ? 255 : 0));
-				}
-			}
-		}
-	}
-
 	public static void main(String[] args)
 	{
 		ArrayList<ArrayList<Double>> dataSet = new ArrayList<>();
@@ -739,7 +610,7 @@ public class GMMUtil
 		ArrayList<Double> test = new ArrayList<>();
 		ArrayList<Double> mean = new ArrayList<>();
 		ArrayList<Double> cov = new ArrayList<>();
-		for (int j = 0; j < 4; j++)
+
 		{
 			test.add((double) random.nextInt(10));
 			mean.add((double) random.nextInt(10));
@@ -752,6 +623,5 @@ public class GMMUtil
 		System.out.println(cov.toString());
 		System.out.println(computeMahalanobisDistance(test, mean, cov));
 
-		
 	}
 }

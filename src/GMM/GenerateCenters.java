@@ -28,7 +28,7 @@ public class GenerateCenters
 		double[][] points = GMMUtil.toArray((ArrayList<ArrayList<Double>>) dataSet);
 		kmeans_data kmdata = new kmeans_data(points, dataSet.size(), dataSet.get(0).size()); // 初始化数据结构
 		kmeans_param param = new kmeans_param(); // 初始化参数结构
-		param.initCenterMehtod = kmeans_param.CENTER_RANDOM; // 设置聚类中心点的初始化模式为随机模式
+		param.initCenterMehtod = kmeans_param.CENTER_ORDER; // 设置聚类中心点的初始化模式为随机模式
 
 		// 做KMeans计算，k
 		kmeans.doKmeans(K, kmdata, param);
