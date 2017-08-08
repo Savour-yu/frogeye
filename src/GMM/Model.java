@@ -17,7 +17,7 @@ import Util.GMMUtil;
 public class Model
 {
 	private static double defaultWight = 0.05;// 默认的权重
-	private static double[][] defaultCovMatrix = { { 900, 900, 900 } };// 默认标准差为30，方差为900
+	private static double[][] defaultCovMatrix = { { 100, 100, 100 } };// 默认标准差为30，方差为900
 	private static ArrayList<Double> defaultCov = new ArrayList<>(GMMUtil.toList(defaultCovMatrix).get(0));// 默认的协方差矩阵
 	private static double defaultWeightSum = 1.0;// 所有模型的默认权重和
 	private double weight;// 峰的权重
@@ -75,6 +75,15 @@ public class Model
 			center.add(d1);
 		}
 
+	}
+
+	public Model(Model model)
+	{
+		// TODO Auto-generated constructor stub
+		weight = model.getWeight();
+		rank = model.getRank();
+		cov = new ArrayList<>(model.getCov());
+		
 	}
 
 	public double getWeight()

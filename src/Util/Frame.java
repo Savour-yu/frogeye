@@ -117,54 +117,70 @@ public class Frame
 		if ((countRead[EPCIndex][AntIndex]) < ((int) (readLength * 1.2)))
 		{
 			countRead[EPCIndex][AntIndex]++;
-			logger.error("success4");
+			// logger.error("success4");
 
 		} else
 		{
 			// 某个标签的某根天线读满了
-			// countFull[EPCIndex] = true;
-			logger.error("success3");
-			countRead[EPCIndex][AntIndex] = 0;
+			countFull[EPCIndex] = true;
+			// logger.error("success3");
+			// countRead[EPCIndex][AntIndex] = 0;
 
 		}
-		logger.error("success0\t" + countRead[EPCIndex][AntIndex]);
-//		for (int i = 0; i < tagNum; i++)
-//		{
-//
-//			if (countFull[i])
-//			{
-//				count++;
-//				logger.error("success1");
-//			}
-//
-//		}
-//		// 某根天线读满的标签数量超过总数的0.8
-//
-//		if (count >= 0.8 * tagNum)
-//		{
-//			logger.error("success2");
-//			double[][][] frame = new double[tagNum][readLength][antNum];
-//			// 截取前面的readlength次读
-//			for (int i = 0; i < tagNum; i++)
-//			{
-//				for (int j = 0; j < readLength; j++)
-//				{
-//					for (int k = 0; k < antNum; k++)
-//					{
-//						frame[i][j][k] = unit[i][j][k];
-//					}
-//				}
-//			}
-//			clearRecord();
-//			// 将frame传给GMM
-//			for (int i = 0; i < readLength; i++)
-//			{
-//
-////				gmms.get(EPCIndex).fit(GMMUtil.toList(frame[EPCIndex]).get(i), 0.05);
-//				logger.error(gmms.get(EPCIndex).toString());
-//			}
-//
-//		}
+		// logger.error("success0\t" + countRead[EPCIndex][AntIndex]);
+		for (int i = 0; i < tagNum; i++)
+		{
+
+			if (countFull[i])
+			{
+				count++;
+				// logger.error("success1");
+			}
+
+		}
+		// 某根天线读满的标签数量超过总数的0.8
+
+		if (count > 0.8 * tagNum)
+		{
+			logger.error("success2");
+			double[][][] frame = new double[tagNum][readLength][antNum];
+			// 截取前面的readlength次读
+			for (int i = 0; i < tagNum; i++)
+			{
+				for (int j = 0; j < readLength; j++)
+				{
+					for (int k = 0; k < antNum; k++)
+					{
+						frame[i][j][k] = unit[i][j][k];
+					}
+				}
+			}
+			clearRecord();
+			// 将frame传给GMM
+			countFrame++;
+			if(countFrame<10) {
+				return;
+			}
+			for (int i = 0; i < readLength; i++)
+			{
+
+				if(gmms.get(EPCIndex).fit(GMMUtil.toList(frame[EPCIndex]).get(i), GaussianMM.trainLearningRate)<0) {
+					gmms.get(EPCIndex).repaintChart(tagEpcList.get(EPCIndex)+" no hit "+countFrame);
+					
+				}
+
+			}
+			if (countFrame % 10 == 0)
+			{
+				for(int k = 0;k<tagEpcList.size();k++) {
+					gmms.get(k).repaintChart(tagEpcList.get(k)+" normal refresh "+countFrame);
+				}
+				
+				
+			}
+
+		}
+		
 
 	}
 
@@ -220,7 +236,6 @@ public class Frame
 			makeAUnit(aEPC, RSSI, AntennaID);
 			charts.get(index).receiveData(RSSI, AntennaID);
 			// logger.error(String.format("%s", aEPC));
-			
 
 			// unit[index][countRead[index][AntennaID - 1]][AntennaID - 1] = RSSI;
 			// // 判断什么时候完成了一帧数据，由于来的数据是随机的

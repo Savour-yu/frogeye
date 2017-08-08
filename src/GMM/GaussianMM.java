@@ -26,7 +26,8 @@ public class GaussianMM
 	private GMMProbabilityChart chart;
 	private static Logger gmmLogger = Logger.getLogger("GMMlogger");
 	private int countForRecievedVector = 0;
-
+	public static double trainLearningRate = 0.1;//训练阶段学习率
+	public static double testLearningRate = 0.001;//试用阶段学习率
 	public GaussianMM(int K, int dimension)
 	{
 
@@ -41,7 +42,7 @@ public class GaussianMM
 		{
 			ArrayList<Double> tmp = new ArrayList<>();
 			for(int j=0;j<dimension;j++) {
-				tmp.add(random.nextDouble()*10+50);
+				tmp.add(random.nextDouble()*10-60);
 			}
 			centers.add(tmp);
 		}
@@ -49,14 +50,18 @@ public class GaussianMM
 		{
 			models.add(new Model(item));
 		}
-		System.out.println(toString());
+//		System.out.println(toString());
 	}
 
-	public void repaintChart()
+	public void repaintChart(String epc)
 	{
-		chart.dispose();
-		chart = new GMMProbabilityChart("GMM Probability for one tag in one dimension", "Probability Distrubutions");
+		
+		chart.reDraw();
+//		chart.setName(epc);
+		chart.setTitle(epc);
+//		chart = new GMMProbabilityChart("GMM Probability for tag"+epc, "Probability Distrubutions");
 		chart.drawGMM(this);
+		chart.start();
 	}
 
 	public int getDimension()
@@ -133,7 +138,7 @@ public class GaussianMM
 	 * @param alpha学习率
 	 * @return 是否拟合模型
 	 */
-	public boolean fit(ArrayList<Double> aFrame, double alpha)
+	public int fit(ArrayList<Double> aFrame, double alpha)
 	{
 		int hit = -1;// 是否拟合混合模型中某个模型，-1则无拟合，否则则为拟合模型序号
 		Model.sortModel(models);
@@ -204,17 +209,14 @@ public class GaussianMM
 		else
 		{
 			Model model = new Model(aFrame);
-			// 倒数第二个模型的排序大于默认模型，否则一直将weight缩小直到插入的是最小模型
-			while (models.get(models.size() - 2).getRank() < model.getRank())
-			{
-				model.setWeight(model.getWeight() / 2);
-			}
+			// 替代最小模型
 			models.set(models.size() - 1, model);
-			Model.rejustWeight(models);// 调整权重
+			Model.sortModel(models);// 调整权重并排序
+//			Model.rejustWeight(models);
 
 		}
 		gmmLogger.error(this.toString());
-		return (hit >= 0 ? true : false);
+		return hit;
 	}
 
 	public String toString()
@@ -296,13 +298,13 @@ public class GaussianMM
 		{
 			gmm.fit(doubles, 0.1);
 		}
-		gmm.repaintChart();
+//		gmm.repaintChart();
 		for (ArrayList<Double> doubles : testDataList)
 		{
 			gmm.fit(doubles, 0.1);
 
 		}
-		gmm.repaintChart();
+//		gmm.repaintChart();
 
 	}
 }

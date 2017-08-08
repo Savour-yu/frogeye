@@ -4,6 +4,9 @@ import org.jfree.chart.ChartPanel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
+
+import javax.swing.JFrame;
+
 import java.awt.Color;
 import java.awt.BasicStroke;
 import org.jfree.chart.JFreeChart;
@@ -20,7 +23,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
-public class GMMProbabilityChart extends ApplicationFrame
+public class GMMProbabilityChart extends JFrame
 {
 
 	private XYSeriesCollection dataset = new XYSeriesCollection();
@@ -32,6 +35,7 @@ public class GMMProbabilityChart extends ApplicationFrame
 	public GMMProbabilityChart(String applicationTitle, String chartTitle)
 	{
 		super(applicationTitle);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		JFreeChart xylineChart = ChartFactory.createXYLineChart(chartTitle, "RSSI", "Frequency", dataset,
 				PlotOrientation.VERTICAL, true, true, false);
 
@@ -55,19 +59,15 @@ public class GMMProbabilityChart extends ApplicationFrame
 		// numAxis.setAutoRange(false);
 		numAxis.setAutoRangeIncludesZero(false);
 		numAxis.setNegativeArrowVisible(false);
-		start();
+//		start();
 	}
-
+	public void reDraw() {
+		AntennaIDs=new ArrayList<>();
+		dataset.removeAllSeries();
+	}
 	public void receiveData(double rssi, double probability, int antennaID)
 	{
 
-		if (startFlag == false)
-		{
-			startTime = new Date();
-		}
-		Date current = new Date();
-
-		startFlag = true;
 		if (!(AntennaIDs.contains(antennaID)))
 		{
 			AntennaIDs.add(antennaID);
@@ -92,7 +92,7 @@ public class GMMProbabilityChart extends ApplicationFrame
 
 	public void drawGMM(GaussianMM model)
 	{
-		double start = -90.0;
+		double start = -100.0;
 		double end = -20;
 		double slice = 1;
 
@@ -101,16 +101,20 @@ public class GMMProbabilityChart extends ApplicationFrame
 			for (int d = 0; d < model.getDimension(); d++)
 			{
 				double probability = model.computeProbabilityByDimension(i, d);
-				receiveData(i, probability, d);
+				receiveData(i, probability, d + 1);
 			}
 		}
 	}
 
 	public void start()
 	{
-		pack();
-		RefineryUtilities.centerFrameOnScreen(this);
-		setVisible(true);
+		if (!startFlag)
+		{
+			pack();
+			RefineryUtilities.centerFrameOnScreen(this);
+			setVisible(true);
+			startFlag = true;
+		}
 	}
 
 	public static void main(String[] args)
@@ -119,20 +123,21 @@ public class GMMProbabilityChart extends ApplicationFrame
 				"Probability Distrubutions");
 
 		Random random = new Random();
-		while (true)
-		{
-			try
-			{
-				Thread.sleep(10);
-			} catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			int rssi = random.nextInt(60) + 30;
-			int ant = random.nextInt(3);
-
-		}
+//		while (true)
+//		{
+//			try
+//			{
+//				Thread.sleep(10);
+//			} catch (InterruptedException e)
+//			{
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			int rssi = random.nextInt(60) + 30;
+//			int ant = random.nextInt(3);
+//
+//		}
+		
 	}
 
 }

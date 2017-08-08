@@ -925,7 +925,7 @@ public class Endpoint implements LLRPEndpoint
 		Endpoint example = new Endpoint();
 		logger.setLevel(Level.INFO);
 
-		example.connect("192.168.1.118");
+		example.connect("192.168.1.117");
 		example.enableImpinjExtensions();
 		example.factoryDefault();
 		example.getReaderCapabilities();

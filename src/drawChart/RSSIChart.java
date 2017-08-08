@@ -5,6 +5,9 @@ import org.jfree.chart.ChartPanel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
+
+import javax.swing.JFrame;
+
 import java.awt.Color;
 import java.awt.BasicStroke;
 import org.jfree.chart.JFreeChart;
@@ -18,7 +21,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
-public class RSSIChart extends ApplicationFrame
+public class RSSIChart extends JFrame
 {
 	private XYSeriesCollection dataset = new XYSeriesCollection();
 	private ArrayList<Integer> AntennaIDs = new ArrayList<>();
@@ -29,6 +32,7 @@ public class RSSIChart extends ApplicationFrame
 	public RSSIChart(String applicationTitle, String chartTitle)
 	{
 		super(applicationTitle);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		JFreeChart xylineChart = ChartFactory.createXYLineChart(chartTitle, "Time(mSeconds)", "RSSI", dataset,
 				PlotOrientation.VERTICAL, true, true, false);
 
