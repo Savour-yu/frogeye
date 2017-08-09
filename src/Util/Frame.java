@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
@@ -18,6 +20,7 @@ import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 
 import GMM.GaussianMM;
 import drawChart.RSSIChart;
+import runnable.TagRunnable;
 
 public class Frame
 {
@@ -36,15 +39,21 @@ public class Frame
 
 	private static ArrayList<RSSIChart> charts = new ArrayList<>();
 	private static boolean initedFlag = false;
-	private static ArrayList<GaussianMM> gmms = new ArrayList<>();
+//	private static ArrayList<GaussianMM> gmms = new ArrayList<>();
 	private static int countTagReport = 0;
 	private static ArrayList<Integer> antennaList = new ArrayList<>();
 
 	private static boolean flag = true;
+	private static ArrayList<ArrayBlockingQueue<ArrayList<Double>>> queues = new ArrayList<>();
 
 	public Frame()
 	{
 
+	}
+
+	public static ArrayList<String> getEPCList()
+	{
+		return tagEpcList;
 	}
 
 	/**
@@ -88,6 +97,15 @@ public class Frame
 				antennaList.add(i + 1);
 			}
 			setEPCListFromFile(EPCFilePath);
+			for (String Epc : tagEpcList)
+			{
+				int index = tagEpcList.indexOf(Epc);
+				charts.add(new RSSIChart("RSSI of tag " + Epc, "Time Serials"));
+				// gmms.add(new GaussianMM(10, antNum));
+				queues.add(new ArrayBlockingQueue<ArrayList<Double>>(1000));
+				new Thread(new TagRunnable(Epc, 10, antNum, queues.get(index))).start();
+
+			}
 			tagNum = tagEpcList.size();
 
 			unit = new double[tagNum][(int) (readLength * 1.3)][antNum];
@@ -158,29 +176,42 @@ public class Frame
 			clearRecord();
 			// 将frame传给GMM
 			countFrame++;
-			if(countFrame<10) {
+			if (countFrame < 10)
+			{
 				return;
 			}
 			for (int i = 0; i < readLength; i++)
 			{
 
-				if(gmms.get(EPCIndex).fit(GMMUtil.toList(frame[EPCIndex]).get(i), GaussianMM.trainLearningRate)<0) {
-					gmms.get(EPCIndex).repaintChart(tagEpcList.get(EPCIndex)+" no hit "+countFrame);
-					
+				try
+				{
+					queues.get(EPCIndex).put((GMMUtil.toList(frame[EPCIndex]).get(i)));
+				} catch (InterruptedException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 
+				// if (gmms.get(EPCIndex).fit(GMMUtil.toList(frame[EPCIndex]).get(i),
+				// GaussianMM.trainLearningRate) < 0)
+				// {
+				// gmms.get(EPCIndex).repaintChart(tagEpcList.get(EPCIndex) + " no hit " +
+				// countFrame);
+				//
+				// }
+
 			}
-			if (countFrame % 10 == 0)
-			{
-				for(int k = 0;k<tagEpcList.size();k++) {
-					gmms.get(k).repaintChart(tagEpcList.get(k)+" normal refresh "+countFrame);
-				}
-				
-				
-			}
+			// if (countFrame % 10 == 0)
+			// {
+			// for (int k = 0; k < tagEpcList.size(); k++)
+			// {
+			// gmms.get(k).repaintChart(tagEpcList.get(k) + " normal refresh " +
+			// countFrame);
+			// }
+			//
+			// }
 
 		}
-		
 
 	}
 
@@ -294,12 +325,6 @@ public class Frame
 		{
 			System.out.println("读取文件内容出错");
 			e.printStackTrace();
-		}
-
-		for (String Epc : tagEpcList)
-		{
-			charts.add(new RSSIChart("RSSI of tag " + Epc, "Time Serials"));
-			gmms.add(new GaussianMM(10, antNum));
 		}
 
 	}

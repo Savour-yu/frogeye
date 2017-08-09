@@ -42,7 +42,7 @@ public class GaussianMM
 		{
 			ArrayList<Double> tmp = new ArrayList<>();
 			for(int j=0;j<dimension;j++) {
-				tmp.add(random.nextDouble()*10-60);
+				tmp.add((double)random.nextInt(10)-60);
 			}
 			centers.add(tmp);
 		}
@@ -50,7 +50,7 @@ public class GaussianMM
 		{
 			models.add(new Model(item));
 		}
-//		System.out.println(toString());
+		System.out.println(toString());
 	}
 
 	public void repaintChart(String epc)

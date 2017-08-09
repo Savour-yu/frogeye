@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.BasicConfigurator;
@@ -132,19 +133,14 @@ public class Endpoint implements LLRPEndpoint
 	public static String ReadResult;
 	public static String Dataread = null;
 	private ROSpec rospec;
-	private AccessSpec accessspec;
-	private int MessageID = 23; // a random starting point
-	private int readOpSpecID = 11;
-	private static int count = 0;
 	private static int count1 = 0;
-	private static int REPORTcount = 0;
 	private static int NOTIFYcount = 0;
-	public Vector<TagReportData> dataVector = new Vector<TagReportData>();
-	public Vector<String[]> dVector = new Vector<String[]>();
+	// public Vector<TagReportData> dataVector = new Vector<TagReportData>();
+	// public Vector<String[]> dVector = new Vector<String[]>();
 
-	public static String Readernum = null;
+	// public static String Readernum = null;
 	// TableModel tb;
-	int number = 0;
+	// int number = 0;
 
 	private UnsignedInteger modelName;
 	UnsignedShort maxPowerIndex;
@@ -843,7 +839,7 @@ public class Endpoint implements LLRPEndpoint
 			epcString += "\n" + " ROSpecID: " + tr.getROSpecID().getROSpecID().toString();
 		}
 
-		count++;
+//		count++;
 		logger3.fatal(epcString);
 
 	}
@@ -859,7 +855,7 @@ public class Endpoint implements LLRPEndpoint
 
 		if (message.getTypeNum() == RO_ACCESS_REPORT.TYPENUM)
 		{
-			REPORTcount++;
+			// REPORTcount++;
 
 			RO_ACCESS_REPORT report1 = (RO_ACCESS_REPORT) message;
 
@@ -868,14 +864,14 @@ public class Endpoint implements LLRPEndpoint
 			{
 
 				Frame.decodeTagReport(tr);
-//				logOneTagReport(tr);
+				// logOneTagReport(tr);
 				count1++;
 			}
-//			List<Custom> clist1 = report1.getCustomList();
-//			for (Custom cust : clist1)
-//			{
-//				logOneCustom(cust);
-//			}
+			// List<Custom> clist1 = report1.getCustomList();
+			// for (Custom cust : clist1)
+			// {
+			// logOneCustom(cust);
+			// }
 		} else if (message.getTypeNum() == READER_EVENT_NOTIFICATION.TYPENUM)
 		{
 			// TODO
@@ -912,7 +908,9 @@ public class Endpoint implements LLRPEndpoint
 	 */
 	public static void main(String[] args)
 	{
+		
 		Frame.initFrame(2, "D:\\EPCList.txt");
+
 		BasicConfigurator.configure();
 
 		if (args.length < 1)
@@ -939,20 +937,13 @@ public class Endpoint implements LLRPEndpoint
 
 		example.start();
 		Scanner aScanner = new Scanner(System.in);
+		//一直阻塞直到输入exit则退出
 		while (!aScanner.nextLine().equals("exit"))
 		{
 		}
 		aScanner.close();
 
-		// try
-		// {
-		//
-		// Thread.sleep(10000);
-		// // example.getReport();
-		// } catch (InterruptedException ex)
-		// {
-		// logger.error("Sleep Interrupted");
-		// }
+
 
 		example.stop();
 		example.disconnect();
